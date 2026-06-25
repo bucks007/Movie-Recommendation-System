@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Profile
+{% endblock %}
+{% block content %}
+
+<h2 class="mb-4">
+    Welcome, {{ user.username }}
+</h2>
+
+<div class="row">
+    <!-- Watchlist -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Watchlist   
+            </div>
+            <div class="card-body">
+                {% if watchlist %}
+                    <ul class="list-unstyled">
+                    {% for item in watchlist %}
+                        <li class="mb-2">
+                            <a href="{% url 'movie_detail' item.movie.id %}">
+                                {{ item.movie.title }}
+                            </a>
+                            <form
+                                method="post"
+                                action="{% url 'remove_watchlist_item' item.movie.id %}"
+                                style="display:inline;"
+                            >
+                                {% csrf_token %}
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-danger"
+                                >
+                                    Remove
+                                </button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No movies in watchlist.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- Ratings -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Ratings
+            </div>
+            <div class="card-body">
+                {% if ratings %}
+                    <ul class="list-unstyled">
+                    {% for rating in ratings %}
+                        <li class="mb-3">
+                            <strong>
+                                {{ rating.movie.title }}
+                            </strong>
+                            ⭐ {{ rating.rating }}
+                            <form
+                                method="post"
+                                action="{% url 'update_rating' rating.id %}"
+                                class="mt-2"
+                            >
+                                {% csrf_token %}
+                                <select
+                                    name="rating"
+                                    class="form-select form-select-sm"
+                                    style="width:120px;"
+                                >
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-primary mt-2"
+                                >
+                                    Update
+                                </button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No ratings yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ movie.title }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+
+    <!-- Poster -->
+    <div class="col-md-4">
+        {% if movie.poster_url %}
+            <img
+                src="{{ movie.poster_url }}"
+                class="img-fluid rounded shadow"
+                alt="{{ movie.title }}"
+            >
+        {% else %}
+            <div
+                class="bg-light border rounded d-flex align-items-center justify-content-center"
+                style="height:500px;"
+            >
+                No Poster Available
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Movie Details -->
+    <div class="col-md-8">
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <h2>{{ movie.title }}</h2>
+
+                <hr>
+
+                <p>
+                    <strong>Genres:</strong>
+                    {{ movie.genres }}
+                </p>
+
+                {% if movie.director %}
+                <p>
+                    <strong>Director:</strong>
+                    {{ movie.director }}
+                </p>
+                {% endif %}
+
+                {% if movie.actors %}
+                <p>
+                    <strong>Actors:</strong>
+                    {{ movie.actors }}
+                </p>
+                {% endif %}
+
+                {% if movie.runtime %}
+                <p>
+                    <strong>Runtime:</strong>
+                    {{ movie.runtime }}
+                </p>
+                {% endif %}
+
+                {% if movie.release_date %}
+                <p>
+                    <strong>Release Date:</strong>
+                    {{ movie.release_date }}
+                </p>
+                {% endif %}
+
+                {% if movie.vote_average %}
+                <p>
+                    <strong>IMDb Rating:</strong>
+                    ⭐ {{ movie.vote_average }}
+                </p>
+                {% endif %}
+
+                {% if movie.overview %}
+                <hr>
+                <h5>Overview</h5>
+                <p>{{ movie.overview }}</p>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+
+                    <hr>
+
+                    {% if is_in_watchlist %}
+                    <form method="post"
+                          action="{% url 'remove_from_watchlist' movie.id %}">
+                        {% csrf_token %}
+                        <button class="btn btn-danger">
+                            Remove from Watchlist
+                        </button>
+                    </form>
+                    {% else %}
+                    <form method="post"
+                          action="{% url 'add_to_watchlist' movie.id %}">
+                        {% csrf_token %}
+                        <button class="btn btn-success">
+                            Add to Watchlist
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <br>
+
+                    {% if user_rating %}
+                    <div class="alert alert-success">
+                        <strong>Your Rating:</strong>
+                        ⭐ {{ user_rating }}/5
+                    </div>
+                    {% else %}
+                    <form
+                        method="post"
+                        action="{% url 'rate_movie' movie.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <label class="form-label">
+                            Rate this movie:
+                        </label>
+
+                        <select
+                            name="rating"
+                            class="form-select"
+                        >
+                            <option value="1">1 ⭐</option>
+                            <option value="2">2 ⭐</option>
+                            <option value="3">3 ⭐</option>
+                            <option value="4">4 ⭐</option>
+                            <option value="5">5 ⭐</option>
+                        </select>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary mt-2"
+                        >
+                            Submit Rating
+                        </button>
+
+                    </form>
+                    {% endif %}
+
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<h3 class="mb-3">
+    Similar Movies
+</h3>
+
+<div class="row">
+
+    {% for rec in recommendations %}
+
+    <div class="col-md-3 mb-4">
+
+        <div class="card h-100 shadow-sm">
+
+            {% if rec.poster_url %}
+                <img
+                    src="{{ rec.poster_url }}"
+                    class="card-img-top"
+                    style="height:350px; object-fit:cover;"
+                    alt="{{ rec.title }}"
+                >
+            {% else %}
+                <div
+                    class="bg-light d-flex align-items-center justify-content-center"
+                    style="height:350px;"
+                >
+                    No Poster
+                </div>
+            {% endif %}
+
+            <div class="card-body d-flex flex-column">
+
+                <h5 class="card-title">
+                    {{ rec.title }}
+                </h5>
+
+                <p class="card-text">
+                    {{ rec.genres|truncatechars:40 }}
+                </p>
+
+                {% if rec.vote_average %}
+                <p>
+                    ⭐ {{ rec.vote_average }}
+                </p>
+                {% endif %}
+
+                <a
+                    href="{% url 'movie_detail' rec.id %}"
+                    class="btn btn-primary mt-auto"
+                >
+                    View Details
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+<a
+    href="{% url 'movie_list' %}"
+    class="btn btn-secondary">
+    Back to Movies
+</a>
+
+{% endblock %}

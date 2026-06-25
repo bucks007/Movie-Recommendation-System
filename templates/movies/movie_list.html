@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Movies
+{% endblock %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+
+<h2 class="mb-4">
+    Recommended For You
+</h2>
+
+{% if personalized_movies %}
+
+<div class="row">
+
+    {% for movie in personalized_movies %}
+
+    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+
+        <div class="card h-100 shadow-sm">
+
+            {% if movie.poster_url %}
+            <img
+                src="{{ movie.poster_url }}"
+                class="card-img-top"
+                alt="{{ movie.title }}"
+                style="height:350px; object-fit:cover;"
+            >
+            {% else %}
+            <div
+                class="d-flex align-items-center justify-content-center bg-light"
+                style="height:350px;"
+            >
+                <span class="text-muted">
+                    No Poster Available
+                </span>
+            </div>
+            {% endif %}
+
+            <div class="card-body d-flex flex-column">
+
+                <h5 class="card-title">
+                    {{ movie.title }}
+                </h5>
+
+                <p class="card-text text-muted">
+                    {{ movie.genres|truncatechars:40 }}
+                </p>
+
+                {% if movie.vote_average > 0 %}
+                <p>
+                    ⭐ {{ movie.vote_average }}
+                </p>
+                {% endif %}
+
+                <a
+                    href="{% url 'movie_detail' movie.id %}"
+                    class="btn btn-primary mt-auto"
+                >
+                    View Details
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info">
+    Rate a few movies to get personalized recommendations.
+</div>
+
+{% endif %}
+
+<hr>
+
+{% endif %}
+
+<h2 class="mb-4">
+    Browse Movies
+</h2>
+
+<form method="GET" class="row mb-4">
+
+    <div class="col-md-10">
+
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            class="form-control"
+            placeholder="Search by movie title... "
+        >
+
+    </div>
+
+    <div class="col-md-2">
+
+        <button
+            type="submit"
+            class="btn btn-primary w-100"
+        >
+            Search
+        </button>
+
+    </div>
+
+</form>
+<div class="row">
+    {% for movie in page_obj %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if movie.poster_url %}
+                    <img
+                        src="{{ movie.poster_url }}"
+                        class="card-img-top"
+                        alt="{{ movie.title }}"
+                        style="height:350px; object-fit:cover;"
+                    >
+                {% else %}
+                    <div
+                        class="d-flex align-items-center justify-content-center bg-light"
+                        style="height:350px;"
+                    >
+                        <span class="text-muted">
+                            No Poster Available
+                        </span>
+                    </div>
+                {% endif %}
+
+                <div class="card-body d-flex flex-column">
+
+                    <h5 class="card-title">
+                        {{ movie.title }}
+                    </h5>
+
+                    <p class="card-text text-muted">
+                        {{ movie.genres|truncatechars:50 }}
+                    </p>
+
+                    {% if movie.release_date %}
+                    <p class="text-muted small">
+                        {{ movie.release_date|date:"Y" }}
+                    </p>
+                    {% endif %}
+
+                    {% if movie.vote_average > 0 %}
+                        <p>
+                            ⭐ {{ movie.vote_average }}
+                        </p>
+                    {% endif %}
+                    <a
+                        href="{% url 'movie_detail' movie.id %}"
+                        class="btn btn-primary mt-auto"
+                    >
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="?page={{ page_obj.previous_page_number }}&q={{ query }}">
+                    Previous
+                </a>
+            </li>
+        {% endif %}
+        <li class="page-item active">
+            <span class="page-link">{{ page_obj.number }}</span>
+        </li>
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="?page={{ page_obj.next_page_number }}&q={{ query }}">
+                    Next
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endblock %}
