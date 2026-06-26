@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from apps.movies.models import Movie
+from apps.movies.utils import clean_movie_title
 import csv
 import os
 
@@ -68,7 +69,7 @@ class Command(BaseCommand):
                     movie_id=movie_id,
 
                     defaults={
-                        "title": row["title"],
+                        "title": clean_movie_title(row["title"]),
                         "genres": row["genres"],
                         "imdb_id": imdb_id,
                         "tmdb_id": tmdb_id,
