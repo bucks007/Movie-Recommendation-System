@@ -3,6 +3,7 @@ from apps.movies.models import Movie
 from apps.recommender.services.content_based import recommend_movies
 from .recommendation_service import (GENRES,get_movies_by_genre,get_top_movies,get_trending_movies,get_top_rated_movies,get_latest_movies,get_movies_by_actor,get_movies_by_director,get_movies_by_year,)
 from .movie_parser import MovieParser
+from .rag_service import rag_answer
 import re
 
 def execute_tool(
@@ -89,12 +90,11 @@ def execute_tool(
     if movie:
         return movie_info_tool(message)
 
+    answer = rag_answer(message)
+
     return {
-
-        "type":"text",
-
-        "message":"Sorry, I couldn't understand your request."
-
+        "type": "text",
+        "message": answer
     }
 
 def serialize_movies(movies):
@@ -203,7 +203,7 @@ def movie_info_tool(message):
 
             "type": "text",
 
-            "message": "Sorry, I couldn't identify the movie."
+            "message": rag_answer(message)
 
         }
 
