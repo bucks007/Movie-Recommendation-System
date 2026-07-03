@@ -3,9 +3,10 @@ from .tool_service import execute_tool
 
 def process_message(user,message):
     intent = detect_intent(message)
-    result = execute_tool(
-        intent,
-        user,
-        message
+    response = execute_tool(
+        intent=intent,
+        user=user,
+        message=message,
     )
-    return result
+
+    return response
