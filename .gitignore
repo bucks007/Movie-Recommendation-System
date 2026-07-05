@@ -22,3 +22,9 @@ db.sqlite3
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Chroma Vector DB
+vector_store/
+
+# HuggingFace cache (optional)
+.cache/
