@@ -31,3 +31,16 @@ def similarity_search(
         query,
         k=k,
     )
+
+def search_movies(
+    query,
+    k=5,
+):
+    """
+    Wrapper used by the orchestrator.
+    Returns relevant movie documents from Chroma.
+    """
+    return similarity_search(
+        query=query,
+        k=k,
+    )

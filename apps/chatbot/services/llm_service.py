@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from movie_recommender.apps.chatbot.services.prompt_loader import load_prompt
+
 load_dotenv()
 
 
@@ -22,33 +24,18 @@ def ask_llm(
     context,
 ):
 
-    prompt = f"""
-        You are an expert movie recommendation assistant.
+    system_prompt = load_prompt("system_prompt.txt")
 
-        You must answer ONLY using the provided movie information.
+    movie_prompt = load_prompt("movie_prompt.txt")
 
-        If multiple movies match, mention all relevant ones.
-
-        If no movie matches the user's request, say:
-
-        "I couldn't find a movie matching that description."
-
-        Never invent movies.
-
-        ========================
-
-        Movie Database
-
-        {context}
-
-        ========================
-
-        User Question
-
-        {question}
-
-        Answer in a friendly conversational style.
-        """
+    prompt = (
+        system_prompt
+        + "\n\n"
+        + movie_prompt.format(
+            context=context,
+            question=question,
+        )
+    )
 
     response = llm.invoke(prompt)
 
