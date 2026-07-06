@@ -10,7 +10,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
 
         docs = similarity_search(
-            "space movies with black holes"
+            "Recommend emotional sci-fi movies"
         )
 
         for i, doc in enumerate(docs, start=1):

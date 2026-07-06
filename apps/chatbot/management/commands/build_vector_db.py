@@ -25,14 +25,121 @@ class Command(BaseCommand):
 
         ids = []
 
+        THEME_MAP = {
+            "Sci-Fi": [
+                "space",
+                "future",
+                "technology",
+                "artificial intelligence",
+                "robots",
+                "aliens",
+                "time travel",
+                "parallel universe",
+                "science fiction",
+                "mind bending",
+                "space exploration",
+                "survival",
+            ],
+
+            "Drama": [
+                "emotional",
+                "relationships",
+                "family",
+                "character driven",
+                "life",
+                "human emotions",
+                "heartwarming",
+            ],
+
+            "Romance": [
+                "love",
+                "romantic",
+                "relationship",
+                "heartwarming",
+                "emotional",
+            ],
+
+            "Adventure": [
+                "journey",
+                "exploration",
+                "quest",
+                "survival",
+                "discovery",
+            ],
+
+            "Thriller": [
+                "suspense",
+                "mystery",
+                "crime",
+                "psychological",
+                "tension",
+            ],
+
+            "Crime": [
+                "detective",
+                "investigation",
+                "gangsters",
+                "mafia",
+                "police",
+            ],
+
+            "Fantasy": [
+                "magic",
+                "mythical",
+                "dragons",
+                "imaginary world",
+            ],
+
+            "Comedy": [
+                "funny",
+                "humor",
+                "lighthearted",
+                "feel good",
+            ],
+
+            "Horror": [
+                "fear",
+                "ghost",
+                "supernatural",
+                "monster",
+                "scary",
+            ],
+        }
+
         for movie in movies:
+            if not movie.overview or len(movie.overview.strip()) < 30:
+                continue
+
+            themes = []
+
+            for genre in (movie.genres or "").split(","):
+
+                genre = genre.strip()
+
+                themes.extend(
+                    THEME_MAP.get(
+                        genre,
+                        []
+                    )
+                )
+
+            themes = ", ".join(sorted(set(themes)))
 
             text = f"""
                 Movie Title:
                 {movie.title}
 
+                Also Known As:
+                {movie.title}
+
+                Overview:
+                {movie.overview}
+
                 Genres:
                 {movie.genres}
+
+                Themes:
+                {themes}
 
                 Director:
                 {movie.director}
@@ -40,43 +147,20 @@ class Command(BaseCommand):
                 Actors:
                 {movie.actors}
 
-                Movie Story:
-                {movie.overview}
-
-                This movie belongs to these genres:
-                {movie.genres}
-
-                Main cast:
-                {movie.actors}
-
-                Directed by:
-                {movie.director}
-
                 Release Year:
                 {movie.release_date.year if movie.release_date else "Unknown"}
 
                 IMDb Rating:
                 {movie.vote_average}
 
-                This document describes the movie "{movie.title}".
-                It can answer questions about:
-                - story
-                - plot
-                - actors
-                - cast
-                - director
-                - genre
-                - science fiction
-                - romance
-                - comedy
-                - horror
-                - thriller
-                - adventure
-                - animation
-                - action
-                - family
-                - mystery
-                - fantasy
+                This movie is suitable for viewers interested in:
+                {themes}
+
+                People may search for this movie using:
+                - {movie.title}
+                - {movie.director}
+                - {movie.actors}
+                - {movie.genres}
                 """
 
             doc = Document(
@@ -84,6 +168,14 @@ class Command(BaseCommand):
                 metadata={
                     "movie_id": movie.movie_id,
                     "title": movie.title,
+                    "genres": movie.genres,
+                    "director": movie.director,
+                    "year": (
+                        movie.release_date.year
+                        if movie.release_date
+                        else None
+                    ),
+                    "vote_average": movie.vote_average,
                 },
             )
 

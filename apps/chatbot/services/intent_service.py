@@ -94,14 +94,6 @@ def detect_intent(message):
         message
     ):
         return Intent.YEAR
-    
-    # GENRE
-
-    if re.search(
-        r"\b(action|comedy|romance|drama|thriller|crime|horror|animation|family|adventure|fantasy|sci-fi|science fiction)\b",
-        message
-    ):
-        return Intent.GENRE
 
     # Similar movie
 
@@ -118,6 +110,14 @@ def detect_intent(message):
         message
     ):
         return Intent.RECOMMEND
+    
+    # GENRE
+
+    if re.search(
+        r"\b(action|comedy|romance|drama|thriller|crime|horror|animation|family|adventure|fantasy|sci-fi|science fiction)\b",
+        message
+    ):
+        return Intent.GENRE
 
     # Movie information
 
