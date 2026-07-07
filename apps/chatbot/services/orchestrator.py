@@ -1,11 +1,12 @@
 from apps.movies.models import Movie
-from .intent_service import Intent
-from .tool_service import execute_tool
 
+from .intent_service import Intent
+from .smart_recommendation_engine import smart_recommend
+from .tool_service import execute_tool
 from .movie_serializer import serialize_movies
-from .semantic_search_service import semantic_search
-from .llm_service import ask_llm
 from .context_builder import build_context
+from .llm_service import ask_llm
+from .rag_chain import rag_chain
 
 STRUCTURED_INTENTS = {
     Intent.GENRE,
@@ -17,15 +18,17 @@ STRUCTURED_INTENTS = {
     Intent.LATEST,
 }
 
-
-SEMANTIC_INTENTS = {
+RECOMMENDATION_INTENTS = {
     Intent.RECOMMEND,
     Intent.SIMILAR,
+    Intent.PERSONALIZED,
+}
+
+SEMANTIC_INTENTS = {
     Intent.MOVIE_INFO,
     Intent.SEARCH,
     Intent.UNKNOWN,
 }
-
 def orchestrate(user, intent, message):
 
     # -----------------------
@@ -38,30 +41,41 @@ def orchestrate(user, intent, message):
             user,
             message,
         )
+    
+    # -----------------------
+    # Smart Recommendation
+    # -----------------------
+
+    if intent in RECOMMENDATION_INTENTS:
+
+        movies = smart_recommend(
+            user=user,
+            query=message,
+            top_n=10,
+        )
+
+        context = build_context(movies)
+
+        answer = ask_llm(
+            question=message,
+            context=context,
+        )
+
+        return {
+            "type": "movies",
+            "message": answer,
+            "movies": serialize_movies(movies),
+        }
 
     # -----------------------
     # Semantic Search
     # -----------------------
 
     if intent in SEMANTIC_INTENTS:
-
-        docs = semantic_search(
+        movies = smart_recommend(
+            user=user,
             query=message,
-            k=8,
-        )
-
-        movie_ids = list({
-            doc.metadata["movie_id"]
-            for doc in docs
-        })
-
-        movies = list(
-            Movie.objects.filter(
-                movie_id__in=movie_ids,
-                vote_average__gte=6,
-            ).exclude(
-                release_date__isnull=True
-            )
+            top_n=10,
         )
 
         context = build_context(movies)
@@ -74,7 +88,7 @@ def orchestrate(user, intent, message):
         return {
             "type": "movies",
             "message": answer,
-            "movies": serialize_movies(movies)
+            "movies": serialize_movies(movies),
         }
 
     return execute_tool(

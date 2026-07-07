@@ -1,12 +1,10 @@
 from pathlib import Path
 
-
 PROMPT_DIR = (
     Path(__file__)
     .parent.parent
     / "prompt"
 )
-
 
 def load_prompt(filename):
 
@@ -14,7 +12,6 @@ def load_prompt(filename):
         PROMPT_DIR / filename,
         encoding="utf-8",
     ) as f:
-
         return f.read()
 
 
@@ -30,6 +27,7 @@ MOVIE_PROMPT = load_prompt(
 def build_prompt(
     question,
     context,
+    history,
 ):
 
     return f"""
@@ -38,8 +36,12 @@ def build_prompt(
 {MOVIE_PROMPT}
 
 ========================
+Conversation History
 
-Context
+{history}
+
+========================
+Movie Context
 
 {context}
 

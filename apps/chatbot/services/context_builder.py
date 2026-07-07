@@ -1,9 +1,6 @@
 def build_context(movies):
-
     context = []
-
     for movie in movies:
-
         context.append(
             f"""
             Movie Title:

@@ -3,7 +3,9 @@ from dotenv import load_dotenv
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from google.genai.errors import ServerError
-from .prompt_builder import build_prompt
+from .memory_service import chat_history
+from .prompt_template import prompt
+from .parser_service import parser
 
 load_dotenv()
 
@@ -13,19 +15,31 @@ llm = ChatGoogleGenerativeAI(
     temperature=0.3,
 )
 
+chain = prompt | llm | parser
+
 def ask_llm(question, context):
+    history_text = ""
 
-    prompt = build_prompt(
-        question,
-        context,
-    )
-
+    for message in chat_history.messages:
+        history_text += (
+            f"{message.type}: "
+            f"{message.content}\n"
+        )
     try:
+        answer = chain.invoke(
+            {
+                "question": question,
+                "context": context,
+                "history": history_text,
+            }
+        )
 
-        response = llm.invoke(prompt)
+        chat_history.add_user_message(question)
+        chat_history.add_ai_message(answer)
 
+        return answer
+    
     except ServerError:
-
         return (
             "Sorry, the AI service is currently busy. "
             "Please try again in a few seconds."
@@ -36,13 +50,3 @@ def ask_llm(question, context):
         print(e)
         print("=" * 80)
         return f"Error: {e}"
-
-    if isinstance(response.content, list):
-
-        return "".join(
-            block.get("text", "")
-            for block in response.content
-            if isinstance(block, dict)
-        )
-
-    return response.content

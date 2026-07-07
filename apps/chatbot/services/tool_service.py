@@ -1,8 +1,11 @@
-from .intent_service import Intent
 from apps.movies.models import Movie
+from apps.recommender.services.personalized import recommend_personalized
+from .intent_service import Intent
 from apps.recommender.services.content_based import recommend_movies
 from .recommendation_service import (GENRES,get_movies_by_genre,get_top_movies,get_trending_movies,get_top_rated_movies,get_latest_movies,get_movies_by_actor,get_movies_by_director,get_movies_by_year,)
 from .movie_parser import MovieParser
+from .context_builder import build_context
+from .llm_service import ask_llm
 from .smart_recommendation_service import recommend_by_query
 from .movie_serializer import serialize_movies
 
@@ -118,10 +121,38 @@ def similar_movies_tool(message):
     }
 
 def personalized_tool(user):
+
+    if not user.is_authenticated:
+        return {
+            "type": "text",
+            "message": "Please login to receive personalized recommendations."
+        }
+
+    movies = recommend_personalized(
+        user,
+        top_n=10,
+    )
+
+    if not movies:
+        return {
+            "type": "text",
+            "message": (
+                "I don't have enough information yet.\n\n"
+                "Rate a few movies first so I can personalize recommendations."
+            )
+        }
+
+    context = build_context(movies)
+
+    answer = ask_llm(
+        "Recommend movies for this user based on their watching history.",
+        context,
+    )
+
     return {
-        "type": "text",
-        "message":
-            "Personalized recommendation tool will run here."
+        "type": "movies",
+        "message": answer,
+        "movies": serialize_movies(movies),
     }
 
 def movie_info_tool(message):

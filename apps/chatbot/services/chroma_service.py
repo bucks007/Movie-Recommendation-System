@@ -8,7 +8,7 @@ from apps.chatbot.services.embeddings_service import (
 
 VECTOR_DB_PATH = os.path.join(
     "vector_store",
-    "chroma_db",
+    "chroma_db",    
 )
 
 
@@ -19,6 +19,16 @@ def get_vector_store():
         embedding_function=get_embeddings(),
     )
 
+def get_retriever(
+    k=12,
+):
+
+    return get_vector_store().as_retriever(
+        search_type="similarity",
+        search_kwargs={
+            "k": k,
+        },
+    )
 
 def similarity_search(
     query,
