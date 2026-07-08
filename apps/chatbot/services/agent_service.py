@@ -1,5 +1,4 @@
 import os
-
 from dotenv import load_dotenv
 
 from langchain import hub
@@ -7,28 +6,28 @@ from langchain.agents import (
     AgentExecutor,
     create_tool_calling_agent,
 )
-
 from langchain_google_genai import ChatGoogleGenerativeAI
-
 from .tools.recommendation_tools import (
     recommend_by_genre,
     top_movies,
 )
-
 from .tools.search_tools import (
-    search_movie,
+    search_movies,
 )
-
 from .tools.movie_info_tools import (
     movie_information,
 )
-
 from .tools.semantic_tools import (
     semantic_movie_search,
 )
-
 from .tools.general_tools import (
     chatbot_help,
+)
+from .tools.personalized_tools import (
+    personalized_recommendations,
+)
+from .tools.hybrid_tools import (
+    recommend_movies,
 )
 
 load_dotenv()
@@ -43,9 +42,11 @@ llm = ChatGoogleGenerativeAI(
 tools = [
     recommend_by_genre,
     top_movies,
-    search_movie,
+    search_movies,
     movie_information,
     semantic_movie_search,
+    personalized_recommendations,
+    recommend_movies,
     chatbot_help,
 ]
 
@@ -61,6 +62,7 @@ agent_executor = AgentExecutor(
     agent=agent,
     tools=tools,
     verbose=True,
+    return_intermediate_steps=True,
 )
 
 def run_agent(message):
@@ -71,4 +73,10 @@ def run_agent(message):
         }
     )
 
-    return result["output"]
+    print("\n" + "=" * 80)
+    print("AGENT RESULT")
+    print("=" * 80)
+    print(result)
+    print("=" * 80 + "\n")
+
+    return result

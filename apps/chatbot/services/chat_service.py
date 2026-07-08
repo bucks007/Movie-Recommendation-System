@@ -1,13 +1,11 @@
-from .intent_service import detect_intent
-from .orchestrator import orchestrate
+from .chat_pipeline import chat_pipeline
 
 
 def process_message(user, message):
 
-    intent = detect_intent(message)
-
-    return orchestrate(
-        user=user,
-        intent=intent,
-        message=message,
+    return chat_pipeline.invoke(
+        {
+            "user": user,
+            "message": message,
+        }
     )

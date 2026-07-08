@@ -4,7 +4,7 @@ from ..movie_parser import MovieParser
 @tool
 def movie_information(title: str):
     """
-    Get information about a movie.
+   Get detailed information about a movie.
     """
 
     movie = MovieParser.find_movie(title)
@@ -12,10 +12,17 @@ def movie_information(title: str):
     if movie is None:
         return "Movie not found."
 
-    return {
-        "title": movie.title,
-        "overview": movie.overview,
-        "director": movie.director,
-        "actors": movie.actors,
-        "rating": movie.vote_average,
-    }
+    return f"""
+        Title: {movie.title}
+
+        Genres: {movie.genres}
+
+        Director: {movie.director}
+
+        Actors: {movie.actors}
+
+        IMDb Rating: {movie.vote_average}
+
+        Overview:
+        {movie.overview}
+        """
