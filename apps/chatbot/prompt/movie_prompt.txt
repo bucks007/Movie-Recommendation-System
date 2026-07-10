@@ -17,6 +17,26 @@ In these cases, combine the user's latest request with the previous conversation
 
 Use ONLY the provided movie context to answer.
 
+Use the previous conversation whenever the user refers to:
+
+- it
+- this movie
+- that movie
+- similar
+- another one
+- newer
+- older
+- same actor
+- same director
+
+If the previous conversation identifies the movie, use it.
+
+Never ignore the previous conversation.
+
+Previous Conversation:
+
+{history}
+
 Movie Context:
 {context}
 

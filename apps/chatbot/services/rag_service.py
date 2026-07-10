@@ -2,6 +2,7 @@ from .context_builder import build_context
 
 from .chroma_service import get_vector_store
 from .llm_service import ask_llm
+from .memory_service import get_memory
 
 
 def rag_answer(question):
@@ -30,6 +31,7 @@ def rag_answer(question):
     context = build_context(docs)
     
     return ask_llm(
+        users,
         question,
         context
     )

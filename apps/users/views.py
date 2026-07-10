@@ -96,6 +96,36 @@ def profile_view(request):
             for genre in top_genres
         ]
     )
+    recent_ratings = list(
+        ratings[:10]
+    )
+    recent_ratings.reverse()
+    rating_activity_labels = json.dumps(
+        [
+            rating.movie.title[:18]
+            for rating in recent_ratings
+        ]
+    )
+    rating_activity_values = json.dumps(
+        [
+            rating.rating
+            for rating in recent_ratings
+        ]
+    )
+    dashboard_mix_labels = json.dumps(
+        [
+            "Ratings",
+            "Watchlist",
+            "Recommendations",
+        ]
+    )
+    dashboard_mix_values = json.dumps(
+        [
+            total_ratings,
+            watchlist_count,
+            len(recommended_movies),
+        ]
+    )
     context = {
         "ratings": ratings,
         "watchlist": watchlist,
@@ -107,6 +137,10 @@ def profile_view(request):
         "rating_distribution": rating_distribution,
         "genre_labels": genre_labels,
         "genre_values": genre_values,
+        "rating_activity_labels": rating_activity_labels,
+        "rating_activity_values": rating_activity_values,
+        "dashboard_mix_labels": dashboard_mix_labels,
+        "dashboard_mix_values": dashboard_mix_values,
     }
     return render(
         request,

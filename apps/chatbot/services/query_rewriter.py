@@ -1,31 +1,60 @@
-import re
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+
+from .llm_service import llm
+from .memory_store import get_session_history
 
 
-def rewrite_query(query: str) -> str:
+rewrite_prompt = ChatPromptTemplate.from_template(
+"""
+You are a query rewriting assistant.
 
-    query = query.strip()
+Rewrite the user's latest question into a standalone question.
 
-    # Already contains movie-related words
-    movie_words = [
-        "movie",
-        "film",
-        "actor",
-        "director",
-        "genre",
-        "recommend",
-        "starring",
-    ]
+Use the previous conversation only if needed.
 
-    if any(word in query.lower() for word in movie_words):
+Do NOT answer the question.
+
+Conversation History:
+{history}
+
+Current Question:
+{question}
+
+Standalone Question:
+"""
+)
+
+rewrite_chain = (
+    rewrite_prompt
+    | llm
+    | StrOutputParser()
+)
+
+
+def rewrite_query(user, query):
+
+    history = get_session_history(str(user.id))
+
+    history_text = "\n".join(
+        f"{msg.type}: {msg.content}"
+        for msg in history.messages
+    )
+
+    # No previous conversation
+    if not history_text.strip():
         return query
 
-    # Very short queries
-    query = query.lower()
+    rewritten = rewrite_chain.invoke(
+        {
+            "history": history_text,
+            "question": query,
+        }
+    )
 
-    query = query.replace("astronauts", "space astronauts")
-    query = query.replace("space survival", "space survival movie")
-    query = query.replace("dreams", "dreams subconscious")
-    query = query.replace("spirituality", "religion spirituality faith")
-    query = query.replace("future", "science fiction future")
+    print("\n" + "=" * 80)
+    print("Original :", query)
+    print("Rewritten:", rewritten)
+    print("=" * 80 + "\n")
 
-    return query
+    return rewritten

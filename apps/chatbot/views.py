@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
 import json
-from .services.memory_service import chat_history
+from .services.memory_service import get_memory
 from .services.chat_service import process_message
 
 
@@ -31,7 +31,8 @@ def chat_message(request):
     return JsonResponse(result)
 
 def new_chat(request):
-    chat_history.clear()
+    memory = get_memory(request.user)
+    memory.clear()
 
     return JsonResponse({
 

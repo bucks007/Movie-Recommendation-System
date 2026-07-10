@@ -1,11 +1,18 @@
 from .chat_pipeline import chat_pipeline
 
-
 def process_message(user, message):
 
     return chat_pipeline.invoke(
-        {
-            "user": user,
-            "message": message,
+
+    {
+        "user": user,
+        "message": message,
+    },
+
+    config={
+        "configurable": {
+            "session_id": str(user.id)
         }
-    )
+    }
+
+)

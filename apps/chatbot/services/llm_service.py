@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from google.genai.errors import ServerError
-from .memory_service import chat_history
+from .memory_service import get_memory
 from .prompt_template import prompt
 from .parser_service import parser
 
@@ -17,13 +17,21 @@ llm = ChatGoogleGenerativeAI(
 
 chain = prompt | llm | parser
 
-def ask_llm(question, context):
+def ask_llm(user,question, context):
+    memory = get_memory(user)
+
     history_text = ""
 
-    for message in chat_history.messages:
+    for msg in memory.messages:
+
+        role = (
+            "User"
+            if msg.type == "human"
+            else "Assistant"
+        )
+
         history_text += (
-            f"{message.type}: "
-            f"{message.content}\n"
+            f"{role}: {msg.content}\n"
         )
     try:
         answer = chain.invoke(
@@ -34,8 +42,8 @@ def ask_llm(question, context):
             }
         )
 
-        chat_history.add_user_message(question)
-        chat_history.add_ai_message(answer)
+        memory.add_user_message(question)
+        memory.add_ai_message(answer)
 
         return answer
     

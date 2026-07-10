@@ -28,10 +28,12 @@ def execute_tool(intent,user,message):
 
     elif intent == Intent.RECOMMEND:
         return recommend_movies_tool(
+            user,
             message
         )
     elif intent == Intent.SIMILAR:
         return similar_movies_tool(
+            user,
             message
         )
     elif intent == Intent.PERSONALIZED:
@@ -39,10 +41,12 @@ def execute_tool(intent,user,message):
     
     elif intent == Intent.MOVIE_INFO:
         return movie_info_tool(
+            user,
             message
         )
     elif intent == Intent.SEARCH:
         return search_tool(
+            user,
             message
         )
     elif intent == Intent.GENRE:
@@ -54,7 +58,7 @@ def execute_tool(intent,user,message):
     elif intent == Intent.LATEST:
         return latest_tool(message)
     elif intent == Intent.ACTOR:
-        return actor_tool(message)
+        return actor_tool(user,message)
     elif intent == Intent.DIRECTOR_MOVIES:
         return director_movies_tool(message)
     elif intent == Intent.YEAR:
@@ -66,8 +70,8 @@ def execute_tool(intent,user,message):
     }
 
 # Place Holder tools
-def recommend_movies_tool(message):
-    movie = MovieParser.find_movie(message)
+def recommend_movies_tool(user,message):
+    movie = MovieParser.find_movie(user,message)
 
     if movie:
         recommendations = recommend_movies(
@@ -98,8 +102,8 @@ def recommend_movies_tool(message):
         "movies": serialize_movies(movies),
     }
 
-def similar_movies_tool(message):
-    movie = MovieParser.find_movie(message)
+def similar_movies_tool(user,message):
+    movie = MovieParser.find_movie(user, message)
     if not movie:
         return {
             "type": "text",
@@ -155,19 +159,40 @@ def personalized_tool(user):
         "movies": serialize_movies(movies),
     }
 
-def movie_info_tool(message):
-    movie = MovieParser.find_movie(message)
-    if not movie:
+def movie_info_tool(user,message):
+    movie = MovieParser.find_movie(user, message)
+    if movie is None:
+
+        movie = MovieParser.get_last_movie(user)
+
+    if movie is None:
+
         return {
             "type": "text",
-            "message": message
+            "message": "Which movie are you referring to?"
         }
+    
     msg = message.lower()
 
     if "director" in msg or "directed" in msg:
         answer = f"{movie.title} was directed by {movie.director}."
-    elif "actor" in msg or "cast" in msg:
-        answer = f"The main cast includes {movie.actors}."
+    elif any(
+        word in msg
+        for word in [
+            "actor",
+            "actors",
+            "cast",
+            "star",
+            "stars",
+            "starring",
+            "lead"
+        ]
+    ):
+        answer = (
+            f"The main cast includes {movie.actors}"
+            if movie.actors
+            else "Cast information is not available."
+        )
     elif "plot" in msg or "story" in msg:
         answer = movie.overview
     elif "runtime" in msg:
@@ -252,13 +277,13 @@ def trending_tool(message=None):
         "movies": serialize_movies(movies)
     }
 
-def search_tool(message):
-    # Remove command words from the query
+def search_tool(user, message):
+
     query = re.sub(
         r"\b(find|search|show)\b",
         "",
         message,
-        flags=re.IGNORECASE
+        flags=re.IGNORECASE,
     ).strip()
 
     if not query:
@@ -267,13 +292,13 @@ def search_tool(message):
             "message": "Please tell me which movie you want to search."
         }
 
-    movie = MovieParser.find_movie(query)
+    movie = MovieParser.find_movie(user, query)
 
     if movie:
         return {
             "type": "movies",
             "message": "I found this movie.",
-            "movies": serialize_movies([movie])
+            "movies": serialize_movies([movie]),
         }
 
     movies = Movie.objects.filter(
@@ -285,10 +310,11 @@ def search_tool(message):
             "type": "text",
             "message": f"No movies found for '{query}'."
         }
+
     return {
         "type": "movies",
         "message": f"I found {movies.count()} movie(s).",
-        "movies": serialize_movies(movies)
+        "movies": serialize_movies(movies),
     }
 
 def top_rated_tool():

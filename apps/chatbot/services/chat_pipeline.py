@@ -11,10 +11,12 @@ from .llm_service import ask_llm
 from .movie_serializer import serialize_movies
 from .tool_service import execute_tool
 
+
 rewrite_runnable = RunnableLambda(
     lambda x: {
         **x,
         "query": rewrite_query(
+            x["user"],
             x["message"]
         )
     }
@@ -42,7 +44,8 @@ def recommendation_node(x):
     )
 
     answer = ask_llm(
-        x["message"],
+        x["user"],
+        x["query"],
         context,
     )
 

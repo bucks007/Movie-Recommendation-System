@@ -1,6 +1,7 @@
 import re
 from rapidfuzz import process, fuzz
 from apps.movies.models import Movie
+from .memory_store import get_state
 
 
 class MovieParser:
@@ -27,40 +28,42 @@ class MovieParser:
 
 
     @staticmethod
-    def find_movie(message):
+    def find_movie(user,message):
 
         query = MovieParser.clean_query(message)
+        state = get_state(user.id)
 
         if not query:
             return None
 
-        # -------------------------
-        # 1 Exact Match
-        # -------------------------
+    # -------------------------
+    # 1 Exact Match
+    # -------------------------
 
         movie = Movie.objects.filter(
             title__iexact=query
         ).first()
 
         if movie:
+            state["last_movie_id"] = movie.id
             return movie
 
-        # -------------------------
-        # 2 Partial Match
-        # -------------------------
+    # -------------------------
+    # 2 Partial Match
+    # -------------------------
 
         movies = Movie.objects.filter(
             title__icontains=query
         )
 
         if movies.exists():
-            return movies.order_by(
+            movie = movies.order_by(
                 "-vote_average",
                 "-release_date"
             ).first()
-
-        if movie:
+            state["last_movie_id"] = movie.id
             return movie
+
 
         # -------------------------
         # 3 RapidFuzz
@@ -95,9 +98,24 @@ class MovieParser:
         for movie in movies:
 
             if movie.title == title:
-
-                return Movie.objects.get(
+                movie = Movie.objects.get(
                     id=movie.id
                 )
+                state["last_movie_id"] = movie.id
+                return movie
 
         return None
+    
+    @staticmethod
+    def get_last_movie(user):
+
+        state = get_state(user.id)
+
+        movie_id= state.get("last_movie_id")
+
+        if not movie_id:
+            return None
+
+        return Movie.objects.filter(
+            id=movie_id
+        ).first()
