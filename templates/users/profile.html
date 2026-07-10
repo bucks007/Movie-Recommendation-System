@@ -1,479 +1,884 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Dashboard
+{% block title %}Dashboard{% endblock %}
+{% block body_class %}profile-surface{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --profile-ink: #111827;
+        --profile-muted: #6b7280;
+        --profile-line: rgba(17, 24, 39, .1);
+        --profile-card: rgba(255, 255, 255, .94);
+        --profile-red: #dc2626;
+        --profile-red-dark: #991b1b;
+        --profile-gold: #f59e0b;
+    }
+
+    .profile-surface {
+        background:
+            radial-gradient(circle at top left, rgba(220, 38, 38, .12), transparent 34rem),
+            radial-gradient(circle at 88% 8%, rgba(245, 158, 11, .1), transparent 28rem),
+            #f8fafc;
+        color: var(--profile-ink);
+    }
+
+    .profile-hero {
+        position: relative;
+        overflow: hidden;
+        margin: -1.5rem -12px 2rem;
+        padding: clamp(2.5rem, 6vw, 5rem) 12px 2rem;
+        color: #fff;
+        background:
+            linear-gradient(90deg, rgba(8, 13, 23, .96) 0%, rgba(17, 24, 39, .82) 55%, rgba(17, 24, 39, .42) 100%),
+            url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1800&q=80") center/cover;
+    }
+
+    .profile-hero::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0;
+        height: 40%;
+        background: linear-gradient(transparent, #f8fafc);
+        pointer-events: none;
+    }
+
+    .profile-hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(115deg, transparent 0 35%, rgba(255, 255, 255, .14) 45%, transparent 55% 100%),
+            repeating-linear-gradient(90deg, rgba(255, 255, 255, .05) 0 1px, transparent 1px 120px);
+        opacity: .75;
+        animation: heroSweep 6s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .profile-hero-inner {
+        position: relative;
+        z-index: 1;
+        max-width: 780px;
+        animation: fadeSlideUp .7s ease both;
+    }
+
+    .eyebrow {
+        display: inline-flex;
+        margin-bottom: .9rem;
+        color: #fecaca;
+        font-size: .78rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .profile-title {
+        margin: 0;
+        font-size: clamp(2.35rem, 6vw, 4.7rem);
+        font-weight: 850;
+        line-height: .98;
+        letter-spacing: 0;
+    }
+
+    .profile-copy {
+        max-width: 640px;
+        margin: 1rem 0 0;
+        color: rgba(255, 255, 255, .78);
+        font-size: 1.05rem;
+        line-height: 1.7;
+    }
+
+    .stat-card,
+    .panel,
+    .movie-card,
+    .rating-row {
+        border: 1px solid var(--profile-line);
+        border-radius: 8px;
+        background: var(--profile-card);
+        box-shadow: 0 14px 35px rgba(15, 23, 42, .08);
+    }
+
+    .stat-card {
+        height: 100%;
+        padding: 1.2rem;
+        opacity: 0;
+        transform: translateY(18px);
+        animation: fadeSlideUp .58s ease forwards;
+        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(220, 38, 38, .28);
+        box-shadow: 0 24px 55px rgba(15, 23, 42, .14);
+    }
+
+    .stat-label {
+        margin: .35rem 0 0;
+        color: var(--profile-muted);
+        font-weight: 700;
+    }
+
+    .stat-value {
+        margin: 0;
+        font-size: clamp(1.7rem, 4vw, 2.5rem);
+        font-weight: 850;
+        letter-spacing: 0;
+    }
+
+    .stat-icon {
+        display: inline-grid;
+        width: 44px;
+        height: 44px;
+        margin-bottom: .85rem;
+        place-items: center;
+        border-radius: 8px;
+        background: #fee2e2;
+        color: var(--profile-red-dark);
+        font-weight: 900;
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin: 2rem 0 1.1rem;
+    }
+
+    .section-heading h2 {
+        margin: 0;
+        font-size: 1.45rem;
+        font-weight: 850;
+        letter-spacing: 0;
+    }
+
+    .section-heading p {
+        margin: .3rem 0 0;
+        color: var(--profile-muted);
+    }
+
+    .panel {
+        position: relative;
+        overflow: hidden;
+        padding: 1.25rem;
+        animation: fadeSlideUp .65s ease both;
+        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+
+    .panel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(220, 38, 38, .08), transparent 38%);
+        opacity: 0;
+        transition: opacity .25s ease;
+        pointer-events: none;
+    }
+
+    .panel:hover {
+        transform: translateY(-5px);
+        border-color: rgba(220, 38, 38, .26);
+        box-shadow: 0 24px 55px rgba(15, 23, 42, .14);
+    }
+
+    .panel:hover::before {
+        opacity: 1;
+    }
+
+    .chart-box {
+        position: relative;
+        min-height: 300px;
+    }
+
+    .chart-box.compact {
+        min-height: 260px;
+    }
+
+    .chart-caption {
+        margin: -.35rem 0 1rem;
+        color: var(--profile-muted);
+        font-size: .9rem;
+    }
+
+    .movie-card {
+        height: 100%;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(18px);
+        animation: fadeSlideUp .58s ease forwards;
+        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+
+    .movie-card:hover {
+        transform: translateY(-7px);
+        border-color: rgba(220, 38, 38, .32);
+        box-shadow: 0 24px 55px rgba(15, 23, 42, .16);
+    }
+
+    .poster-wrap {
+        position: relative;
+        display: block;
+        aspect-ratio: 2 / 3;
+        overflow: hidden;
+        background: linear-gradient(135deg, #e5e7eb, #f8fafc);
+        color: var(--profile-muted);
+        text-decoration: none;
+    }
+
+    .poster-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .45s ease, filter .45s ease;
+    }
+
+    .movie-card:hover .poster-wrap img {
+        transform: scale(1.05);
+        filter: saturate(1.08);
+    }
+
+    .poster-missing {
+        display: grid;
+        height: 100%;
+        place-items: center;
+        padding: 1rem;
+        text-align: center;
+        font-weight: 800;
+    }
+
+    .rating-pill {
+        position: absolute;
+        top: .7rem;
+        right: .7rem;
+        padding: .38rem .58rem;
+        border-radius: 999px;
+        background: rgba(17, 24, 39, .88);
+        color: #fff;
+        font-size: .85rem;
+        font-weight: 800;
+        backdrop-filter: blur(8px);
+    }
+
+    .star {
+        color: var(--profile-gold);
+    }
+
+    .movie-card-body {
+        display: flex;
+        min-height: 150px;
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .movie-title {
+        margin: 0 0 .55rem;
+        font-size: 1rem;
+        font-weight: 850;
+        line-height: 1.25;
+    }
+
+    .movie-link,
+    .profile-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        border-radius: 6px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: transform .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+    }
+
+    .movie-link {
+        margin-top: auto;
+        border: 1px solid var(--profile-line);
+        color: var(--profile-ink);
+    }
+
+    .movie-link:hover {
+        border-color: var(--profile-red);
+        background: var(--profile-red);
+        color: #fff;
+    }
+
+    .profile-btn {
+        border: 0;
+        background: linear-gradient(135deg, var(--profile-red), var(--profile-red-dark));
+        color: #fff;
+        padding: .55rem .9rem;
+    }
+
+    .profile-btn:hover {
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .outline-btn {
+        border: 1px solid var(--profile-line);
+        background: #fff;
+        color: var(--profile-ink);
+    }
+
+    .outline-btn:hover {
+        border-color: var(--profile-red);
+        background: var(--profile-red);
+        color: #fff;
+    }
+
+    .rating-row {
+        display: grid;
+        grid-template-columns: 84px minmax(0, 1fr) minmax(240px, .8fr);
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: .85rem;
+        animation: fadeSlideUp .58s ease both;
+    }
+
+    .rating-thumb {
+        display: block;
+        width: 72px;
+        aspect-ratio: 2 / 3;
+        overflow: hidden;
+        border-radius: 6px;
+        background: #e5e7eb;
+    }
+
+    .rating-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .rating-title {
+        margin: 0 0 .25rem;
+        font-weight: 850;
+    }
+
+    .rating-score {
+        margin: 0;
+        color: var(--profile-muted);
+        font-weight: 700;
+    }
+
+    .rating-form {
+        display: flex;
+        gap: .6rem;
+    }
+
+    .rating-form .form-select {
+        min-height: 42px;
+        border-radius: 6px;
+    }
+
+    .empty-state {
+        border: 1px solid rgba(37, 99, 235, .18);
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #1e3a8a;
+        padding: 1rem 1.25rem;
+    }
+
+    @keyframes fadeSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes heroSweep {
+        0%,
+        100% {
+            transform: translateX(-8%);
+        }
+
+        50% {
+            transform: translateX(8%);
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .rating-row {
+            grid-template-columns: 74px minmax(0, 1fr);
+        }
+
+        .rating-form {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .section-heading {
+            align-items: start;
+            flex-direction: column;
+        }
+
+        .rating-row {
+            grid-template-columns: 1fr;
+        }
+
+        .rating-form {
+            flex-direction: column;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
+<section class="profile-hero">
+    <div class="container profile-hero-inner">
+        <span class="eyebrow">Your dashboard</span>
+        <h1 class="profile-title">Welcome, {{ user.username }}</h1>
+        <p class="profile-copy">
+            Track your ratings, revisit your watchlist, and use your activity to shape better movie recommendations.
+        </p>
+    </div>
+</section>
 
-<!-- Header -->
+<section>
+    <div class="row g-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card" style="animation-delay: 0ms;">
+                <div class="stat-icon">M</div>
+                <h2 class="stat-value">{{ total_ratings }}</h2>
+                <p class="stat-label">Movies Rated</p>
+            </div>
+        </div>
 
-<div class="mb-5">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card" style="animation-delay: 80ms;">
+                <div class="stat-icon">W</div>
+                <h2 class="stat-value">{{ watchlist_count }}</h2>
+                <p class="stat-label">Watchlist</p>
+            </div>
+        </div>
 
-    <h2>
-        Welcome, {{ user.username }} 👋
-    </h2>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card" style="animation-delay: 160ms;">
+                <div class="stat-icon">&#9733;</div>
+                <h2 class="stat-value">{{ average_rating }}</h2>
+                <p class="stat-label">Average Rating</p>
+            </div>
+        </div>
 
-    <p class="text-muted">
-        Manage your ratings, watchlist and discover new movies.
-    </p>
-
-</div>
-
-<!-- Statistics -->
-
-<div class="row mb-5">
-
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm text-center h-100">
-            <div class="card-body">
-                <h5>🎬</h5>
-                <h3>{{ total_ratings }}</h3>
-                <p class="text-muted mb-0">
-                    Movies Rated
-                </p>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card" style="animation-delay: 240ms;">
+                <div class="stat-icon">G</div>
+                <h2 class="stat-value fs-4">{{ favorite_genre }}</h2>
+                <p class="stat-label">Favorite Genre</p>
             </div>
         </div>
     </div>
+</section>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm text-center h-100">
-            <div class="card-body">
-                <h5>📌</h5>
-                <h3>{{ watchlist_count }}</h3>
-                <p class="text-muted mb-0">
-                    Watchlist
-                </p>
-            </div>
+<section>
+    <div class="section-heading">
+        <div>
+            <h2>Your Movie Statistics</h2>
+            <p>Ratings and genre signals from your activity.</p>
         </div>
     </div>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm text-center h-100">
-            <div class="card-body">
-                <h5>⭐</h5>
-                <h3>{{ average_rating }}</h3>
-                <p class="text-muted mb-0">
-                    Average Rating
-                </p>
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="panel">
+                <h3 class="h5 fw-bold mb-3">Rating Distribution</h3>
+                <p class="chart-caption">How your ratings are spread across one to five stars.</p>
+                <div class="chart-box">
+                    <canvas id="ratingChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="panel">
+                <h3 class="h5 fw-bold mb-3">Favorite Genres</h3>
+                <p class="chart-caption">Genres from movies you rated four stars or higher.</p>
+                <div class="chart-box">
+                    <canvas id="genreChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="panel">
+                <h3 class="h5 fw-bold mb-3">Recent Rating Trend</h3>
+                <p class="chart-caption">Your latest ratings in the order you added them.</p>
+                <div class="chart-box compact">
+                    <canvas id="ratingTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="panel">
+                <h3 class="h5 fw-bold mb-3">Dashboard Mix</h3>
+                <p class="chart-caption">A quick balance of saved, rated, and recommended movies.</p>
+                <div class="chart-box compact">
+                    <canvas id="dashboardMixChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm text-center h-100">
-            <div class="card-body">
-                <h5>🎭</h5>
-                <h5>{{ favorite_genre }}</h5>
-                <p class="text-muted mb-0">
-                    Favorite Genre
-                </p>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<h3 class="mb-4">
-    Your Movie Statistics
-</h3>
-
-<div class="row mb-5">
-
-    <div class="col-lg-6 mb-4">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <h5 class="mb-3">
-                    Rating Distribution
-                </h5>
-
-                <canvas id="ratingChart"></canvas>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-lg-6 mb-4">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <h5 class="mb-3">
-                    Favorite Genres
-                </h5>
-
-                <canvas id="genreChart"></canvas>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- Personalized Recommendations -->
+</section>
 
 {% if recommended_movies %}
-
-<h3 class="mb-3">
-    Recommended For You
-</h3>
-
-<div class="row mb-5">
-
-{% for movie in recommended_movies %}
-
-<div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-
-    <div class="card h-100 shadow-sm">
-
-        {% if movie.poster_url %}
-        <a href="{% url 'movie_detail' movie.id %}">
-            <img
-                src="{{ movie.poster_url }}"
-                alt="{{ movie.title }}"
-                class="card-img-top"
-                style="height:340px; object-fit:cover;"
-            >
-        </a>
-        {% else %}
-        <div
-            class="bg-light d-flex align-items-center justify-content-center"
-            style="height:340px;"
-        >
-            No Poster
+<section>
+    <div class="section-heading">
+        <div>
+            <h2>Recommended For You</h2>
+            <p>Personalized picks based on your ratings.</p>
         </div>
-        {% endif %}
+    </div>
 
-        <div class="card-body d-flex flex-column">
+    <div class="row g-4">
+        {% for movie in recommended_movies %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <article class="movie-card" style="animation-delay: {{ forloop.counter0 }}0ms;">
+                <a href="{% url 'movie_detail' movie.id %}" class="poster-wrap">
+                    {% if movie.poster_url %}
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                    {% else %}
+                    <span class="poster-missing">No Poster</span>
+                    {% endif %}
 
-            <h6>
-                {{ movie.title }}
-            </h6>
+                    {% if movie.vote_average %}
+                    <span class="rating-pill"><span class="star">&#9733;</span> {{ movie.vote_average }}</span>
+                    {% endif %}
+                </a>
 
-            {% if movie.vote_average %}
-            <p>
-                ⭐ {{ movie.vote_average }}
-            </p>
-            {% endif %}
+                <div class="movie-card-body">
+                    <h3 class="movie-title">{{ movie.title }}</h3>
+                    <a href="{% url 'movie_detail' movie.id %}" class="movie-link">View Details</a>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 
-            <a
-                href="{% url 'movie_detail' movie.id %}"
-                class="btn btn-primary mt-auto"
-            >
-                View Details
+<section>
+    <div class="section-heading">
+        <div>
+            <h2>My Ratings</h2>
+            <p>Update scores as your taste changes.</p>
+        </div>
+    </div>
+
+    {% if ratings %}
+    <div>
+        {% for rating in ratings %}
+        <article class="rating-row" style="animation-delay: {{ forloop.counter0 }}0ms;">
+            <a href="{% url 'movie_detail' rating.movie.id %}" class="rating-thumb">
+                {% if rating.movie.poster_url %}
+                <img src="{{ rating.movie.poster_url }}" alt="{{ rating.movie.title }}">
+                {% endif %}
             </a>
 
-        </div>
+            <div>
+                <h3 class="rating-title">{{ rating.movie.title }}</h3>
+                <p class="rating-score"><span class="star">&#9733;</span> {{ rating.rating }}/5</p>
+            </div>
 
+            <form method="post" action="{% url 'update_rating' rating.id %}" class="rating-form">
+                {% csrf_token %}
+                <select name="rating" class="form-select">
+                    <option value="1" {% if rating.rating == 1 or rating.rating == 1.0 %}selected{% endif %}>1 star</option>
+                    <option value="2" {% if rating.rating == 2 or rating.rating == 2.0 %}selected{% endif %}>2 stars</option>
+                    <option value="3" {% if rating.rating == 3 or rating.rating == 3.0 %}selected{% endif %}>3 stars</option>
+                    <option value="4" {% if rating.rating == 4 or rating.rating == 4.0 %}selected{% endif %}>4 stars</option>
+                    <option value="5" {% if rating.rating == 5 or rating.rating == 5.0 %}selected{% endif %}>5 stars</option>
+                </select>
+                <button class="profile-btn">Update</button>
+            </form>
+        </article>
+        {% endfor %}
     </div>
-
-</div>
-
-{% endfor %}
-
-</div>
-
-{% endif %}
-
-<!-- My Ratings -->
-
-<h3 class="mb-3">
-    My Ratings
-</h3>
-
-<div class="card shadow-sm mb-5">
-
-<div class="card-body">
-
-{% if ratings %}
-
-{% for rating in ratings %}
-
-<div class="row align-items-center mb-4">
-
-    <div class="col-md-2">
-
-        {% if rating.movie.poster_url %}
-        <a href="{% url 'movie_detail' rating.movie.id %}">
-        <img
-            src="{{ rating.movie.poster_url }}"
-            alt="{{ rating.movie.title }}"
-            class="img-fluid rounded"
-            style="height:120px;"
-        >
-        </a>
-        {% endif %}
-
+    {% else %}
+    <div class="empty-state">
+        You have not rated any movies yet.
     </div>
-
-    <div class="col-md-4">
-
-        <strong>
-            {{ rating.movie.title }}
-        </strong>
-
-        <br>
-
-        ⭐ {{ rating.rating }}/5
-
-    </div>
-
-    <div class="col-md-6">
-
-        <form
-            method="post"
-            action="{% url 'update_rating' rating.id %}"
-            class="d-flex"
-        >
-
-            {% csrf_token %}
-
-            <select
-                name="rating"
-                class="form-select me-2"
-            >
-
-            <option value="1" {% if rating.rating == 1 or rating.rating == 1.0 %}selected{% endif %}>1 ⭐</option>
-
-            <option value="2" {% if rating.rating == 2 or rating.rating == 2.0 %}selected{% endif %}>2 ⭐</option>
-
-            <option value="3" {% if rating.rating == 3 or rating.rating == 3.0 %}selected{% endif %}>3 ⭐</option>
-
-            <option value="4" {% if rating.rating == 4 or rating.rating == 4.0 %}selected{% endif %}>4 ⭐</option>
-
-            <option value="5" {% if rating.rating == 5 or rating.rating == 5.0 %}selected{% endif %}>5 ⭐</option>
-
-            </select>
-
-            <button
-                class="btn btn-primary"
-            >
-                Update
-            </button>
-
-        </form>
-
-    </div>
-
-</div>
-
-<hr>
-
-{% endfor %}
-
-{% else %}
-
-<div class="text-center text-muted">
-
-    You haven't rated any movies yet.
-
-</div>
-
-{% endif %}
-
-</div>
-
-</div>
-
-<!-- Watchlist -->
-
-<h3 class="mb-3">
-    My Watchlist
-</h3>
-
-<div class="row">
-
-{% if watchlist %}
-
-{% for item in watchlist %}
-
-<div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-
-<div class="card h-100 shadow-sm">
-
-    {% if item.movie.poster_url %}
-    <a href="{% url 'movie_detail' item.movie.id %}">
-        <img
-            src="{{ item.movie.poster_url }}"
-            alt="{{ item.movie.title }}"
-            class="card-img-top"
-            style="height:340px; object-fit:cover;"
-        >
-    </a>
-
     {% endif %}
+</section>
 
-    <div class="card-body d-flex flex-column">
-
-        <h6>
-
-            {{ item.movie.title }}
-
-        </h6>
-
-        <a
-            href="{% url 'movie_detail' item.movie.id %}"
-            class="btn btn-outline-primary mb-2"
-        >
-            View Details
-        </a>
-
-        <form
-            method="post"
-            action="{% url 'remove_watchlist_item' item.movie.id %}"
-        >
-
-            {% csrf_token %}
-
-            <button
-                class="btn btn-danger w-100"
-            >
-                Remove
-            </button>
-
-        </form>
-
+<section class="mb-5">
+    <div class="section-heading">
+        <div>
+            <h2>My Watchlist</h2>
+            <p>Movies you saved for later.</p>
+        </div>
     </div>
 
-</div>
+    {% if watchlist %}
+    <div class="row g-4">
+        {% for item in watchlist %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <article class="movie-card" style="animation-delay: {{ forloop.counter0 }}0ms;">
+                <a href="{% url 'movie_detail' item.movie.id %}" class="poster-wrap">
+                    {% if item.movie.poster_url %}
+                    <img src="{{ item.movie.poster_url }}" alt="{{ item.movie.title }}">
+                    {% else %}
+                    <span class="poster-missing">No Poster</span>
+                    {% endif %}
+                </a>
 
-</div>
+                <div class="movie-card-body">
+                    <h3 class="movie-title">{{ item.movie.title }}</h3>
+                    <a href="{% url 'movie_detail' item.movie.id %}" class="movie-link mb-2">View Details</a>
+                    <form method="post" action="{% url 'remove_watchlist_item' item.movie.id %}">
+                        {% csrf_token %}
+                        <button class="profile-btn w-100">Remove</button>
+                    </form>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        Your watchlist is empty.
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
 
-{% endfor %}
-
-{% else %}
-
-<div class="text-center text-muted">
-
-    Your watchlist is empty.
-
-</div>
-
-{% endif %}
-
-</div>
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    const chartTextColor = "#6b7280";
+    const chartGridColor = "rgba(17, 24, 39, .08)";
+    const ratingCanvas = document.getElementById("ratingChart");
+    const genreCanvas = document.getElementById("genreChart");
+    const trendCanvas = document.getElementById("ratingTrendChart");
+    const mixCanvas = document.getElementById("dashboardMixChart");
 
-new Chart(
+    function verticalGradient(canvas, start, end) {
+        const gradient = canvas.getContext("2d").createLinearGradient(0, 0, 0, 320);
+        gradient.addColorStop(0, start);
+        gradient.addColorStop(1, end);
+        return gradient;
+    }
 
-    document.getElementById("ratingChart"),
-
-    {
-
-        type: "bar",
-
-        data: {
-
-            labels: [
-
-                "1 ⭐",
-
-                "2 ⭐",
-
-                "3 ⭐",
-
-                "4 ⭐",
-
-                "5 ⭐"
-
-            ],
-
-            datasets: [{
-
-                label: "Movies",
-
-                data: {{ rating_distribution|safe }},
-
-                backgroundColor: [
-                    "#dc3545",
-                    "#fd7e14",
-                    "#ffc107",
-                    "#0d6efd",
-                    "#198754"
-                ]
-
-            }]
-
-        },
-
-        options: {
-
-            responsive: true,
-
-            scales: {
-
-                y: {
-
-                    beginAtZero: true,
-
-                    ticks: {
-
-                        precision: 0
-
+    new Chart(
+        ratingCanvas,
+        {
+            type: "bar",
+            data: {
+                labels: ["1 star", "2 stars", "3 stars", "4 stars", "5 stars"],
+                datasets: [{
+                    label: "Movies",
+                    data: {{ rating_distribution|safe }},
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    backgroundColor: [
+                        verticalGradient(ratingCanvas, "rgba(220, 38, 38, .95)", "rgba(220, 38, 38, .35)"),
+                        verticalGradient(ratingCanvas, "rgba(249, 115, 22, .95)", "rgba(249, 115, 22, .35)"),
+                        verticalGradient(ratingCanvas, "rgba(245, 158, 11, .95)", "rgba(245, 158, 11, .35)"),
+                        verticalGradient(ratingCanvas, "rgba(37, 99, 235, .95)", "rgba(37, 99, 235, .35)"),
+                        verticalGradient(ratingCanvas, "rgba(22, 163, 74, .95)", "rgba(22, 163, 74, .35)")
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 1200,
+                    easing: "easeOutQuart"
+                },
+                plugins: {
+                    legend: {
+                        display: false,
+                        labels: {
+                            color: chartTextColor
+                        }
                     }
-
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: chartTextColor
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            color: chartTextColor
+                        },
+                        grid: {
+                            color: chartGridColor
+                        }
+                    }
                 }
-
             }
-
         }
+    );
 
-    }
-
-);
-
-</script>
-<script>
-
-new Chart(
-
-    document.getElementById("genreChart"),
-
-    {
-
-        type: "pie",
-
-        data: {
-
-            labels: {{ genre_labels|safe }},
-
-            datasets: [{
-
-                data: {{ genre_values|safe }},
-
-                backgroundColor: [
-                "#0d6efd",
-                "#198754",
-                "#ffc107",
-                "#dc3545",
-                "#6f42c1",
-                "#20c997",
-                "#fd7e14",
-                "#6c757d"
-                ]
-
-            }]
-
-        },
-
-        options: {
-
-            responsive: true
-
+    new Chart(
+        genreCanvas,
+        {
+            type: "doughnut",
+            data: {
+                labels: {{ genre_labels|safe }},
+                datasets: [{
+                    data: {{ genre_values|safe }},
+                    borderWidth: 0,
+                    backgroundColor: [
+                        "#dc2626",
+                        "#f59e0b",
+                        "#2563eb",
+                        "#16a34a",
+                        "#7c3aed",
+                        "#0891b2",
+                        "#f97316",
+                        "#64748b"
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1300
+                },
+                cutout: "62%",
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            color: chartTextColor,
+                            boxWidth: 12,
+                            padding: 16
+                        }
+                    }
+                }
+            }
         }
+    );
 
-    }
+    new Chart(
+        trendCanvas,
+        {
+            type: "line",
+            data: {
+                labels: {{ rating_activity_labels|safe }},
+                datasets: [{
+                    label: "Rating",
+                    data: {{ rating_activity_values|safe }},
+                    fill: true,
+                    tension: .42,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: "#dc2626",
+                    pointBorderColor: "#fff",
+                    pointBorderWidth: 2,
+                    borderColor: "#dc2626",
+                    backgroundColor: verticalGradient(trendCanvas, "rgba(220, 38, 38, .22)", "rgba(220, 38, 38, .02)")
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 1400,
+                    easing: "easeOutCubic"
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: chartTextColor,
+                            maxRotation: 0,
+                            autoSkip: true
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        min: 0,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1,
+                            color: chartTextColor
+                        },
+                        grid: {
+                            color: chartGridColor
+                        }
+                    }
+                }
+            }
+        }
+    );
 
-);
-
+    new Chart(
+        mixCanvas,
+        {
+            type: "polarArea",
+            data: {
+                labels: {{ dashboard_mix_labels|safe }},
+                datasets: [{
+                    data: {{ dashboard_mix_values|safe }},
+                    borderWidth: 2,
+                    borderColor: "#fff",
+                    backgroundColor: [
+                        "rgba(220, 38, 38, .72)",
+                        "rgba(245, 158, 11, .72)",
+                        "rgba(37, 99, 235, .72)"
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1300
+                },
+                scales: {
+                    r: {
+                        ticks: {
+                            display: false
+                        },
+                        grid: {
+                            color: chartGridColor
+                        },
+                        angleLines: {
+                            color: chartGridColor
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            color: chartTextColor,
+                            boxWidth: 12,
+                            padding: 16
+                        }
+                    }
+                }
+            }
+        }
+    );
 </script>
 {% endblock %}

@@ -1,195 +1,502 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Movies
+{% block title %}Movies{% endblock %}
+{% block body_class %}movie-surface{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --movie-ink: #111827;
+        --movie-muted: #6b7280;
+        --movie-line: rgba(17, 24, 39, .1);
+        --movie-card: rgba(255, 255, 255, .92);
+        --movie-accent: #dc2626;
+        --movie-accent-dark: #991b1b;
+        --movie-gold: #f59e0b;
+    }
+
+    .movie-surface {
+        background:
+            radial-gradient(circle at top left, rgba(220, 38, 38, .12), transparent 34rem),
+            radial-gradient(circle at 85% 8%, rgba(245, 158, 11, .11), transparent 30rem),
+            #f8fafc;
+        color: var(--movie-ink);
+    }
+
+    .movie-hero {
+        position: relative;
+        overflow: hidden;
+        min-height: 320px;
+        margin: -1.5rem -12px 2rem;
+        padding: clamp(2.5rem, 7vw, 5.5rem) 12px 2rem;
+        color: #fff;
+        background:
+            linear-gradient(90deg, rgba(8, 13, 23, .96) 0%, rgba(17, 24, 39, .82) 48%, rgba(17, 24, 39, .38) 100%),
+            url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1800&q=80") center/cover;
+    }
+
+    .movie-hero::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0;
+        height: 42%;
+        background: linear-gradient(transparent, #f8fafc);
+        pointer-events: none;
+    }
+
+    .movie-hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(115deg, transparent 0 35%, rgba(255, 255, 255, .15) 45%, transparent 55% 100%),
+            repeating-linear-gradient(90deg, rgba(255, 255, 255, .05) 0 1px, transparent 1px 112px);
+        opacity: .72;
+        animation: heroSweep 6s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .movie-hero-inner {
+        position: relative;
+        z-index: 1;
+        max-width: 780px;
+        animation: fadeSlideUp .7s ease both;
+    }
+
+    .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: 1rem;
+        color: #fecaca;
+        font-size: .78rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .hero-title {
+        max-width: 720px;
+        margin: 0;
+        font-size: clamp(2.35rem, 6vw, 4.8rem);
+        font-weight: 800;
+        line-height: .98;
+        letter-spacing: 0;
+    }
+
+    .hero-copy {
+        max-width: 620px;
+        margin: 1rem 0 0;
+        color: rgba(255, 255, 255, .78);
+        font-size: clamp(1rem, 2vw, 1.15rem);
+    }
+
+    .search-panel {
+        position: relative;
+        z-index: 2;
+        margin-top: 2rem;
+        padding: .75rem;
+        border: 1px solid rgba(255, 255, 255, .18);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, .12);
+        backdrop-filter: blur(16px);
+        box-shadow: 0 22px 55px rgba(0, 0, 0, .22);
+    }
+
+    .search-panel .form-control {
+        min-height: 54px;
+        border: 0;
+        border-radius: 6px;
+        box-shadow: none;
+    }
+
+    .movie-btn {
+        min-height: 54px;
+        border: 0;
+        border-radius: 6px;
+        background: linear-gradient(135deg, var(--movie-accent), var(--movie-accent-dark));
+        color: #fff;
+        font-weight: 700;
+        transition: transform .22s ease, box-shadow .22s ease;
+    }
+
+    .movie-btn:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 14px 26px rgba(153, 27, 27, .28);
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin: 2rem 0 1.2rem;
+    }
+
+    .section-heading h2 {
+        margin: 0;
+        font-weight: 800;
+        letter-spacing: 0;
+    }
+
+    .section-heading p {
+        margin: .35rem 0 0;
+        color: var(--movie-muted);
+    }
+
+    .movie-grid {
+        row-gap: 1.5rem;
+    }
+
+    .movie-card {
+        position: relative;
+        height: 100%;
+        overflow: hidden;
+        border: 1px solid var(--movie-line);
+        border-radius: 8px;
+        background: var(--movie-card);
+        box-shadow: 0 14px 35px rgba(15, 23, 42, .08);
+        opacity: 0;
+        transform: translateY(18px);
+        animation: fadeSlideUp .58s ease forwards;
+        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+
+    .movie-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent 0 35%, rgba(255, 255, 255, .32) 45%, transparent 55% 100%);
+        opacity: 0;
+        transform: translateX(-60%);
+        transition: opacity .25s ease, transform .55s ease;
+        pointer-events: none;
+    }
+
+    .movie-card:hover {
+        transform: translateY(-7px);
+        border-color: rgba(220, 38, 38, .32);
+        box-shadow: 0 24px 55px rgba(15, 23, 42, .16);
+    }
+
+    .movie-card:hover::after {
+        opacity: 1;
+        transform: translateX(60%);
+    }
+
+    .poster-wrap {
+        position: relative;
+        aspect-ratio: 2 / 3;
+        background: linear-gradient(135deg, #e5e7eb, #f8fafc);
+        overflow: hidden;
+    }
+
+    .poster-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .45s ease, filter .45s ease;
+    }
+
+    .movie-card:hover .poster-wrap img {
+        transform: scale(1.05);
+        filter: saturate(1.08);
+    }
+
+    .poster-missing {
+        display: grid;
+        height: 100%;
+        place-items: center;
+        padding: 1rem;
+        color: var(--movie-muted);
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .rating-pill {
+        position: absolute;
+        top: .7rem;
+        right: .7rem;
+        padding: .38rem .58rem;
+        border-radius: 999px;
+        background: rgba(17, 24, 39, .88);
+        color: #fff;
+        font-size: .85rem;
+        font-weight: 800;
+        backdrop-filter: blur(8px);
+    }
+
+    .rating-pill span {
+        color: var(--movie-gold);
+    }
+
+    .movie-card-body {
+        display: flex;
+        min-height: 190px;
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .movie-title {
+        margin: 0 0 .55rem;
+        font-size: 1.02rem;
+        font-weight: 800;
+        line-height: 1.25;
+    }
+
+    .movie-meta {
+        margin-bottom: .75rem;
+        color: var(--movie-muted);
+        font-size: .92rem;
+    }
+
+    .genre-chip {
+        display: inline-flex;
+        max-width: 100%;
+        padding: .32rem .55rem;
+        border: 1px solid var(--movie-line);
+        border-radius: 999px;
+        color: #374151;
+        font-size: .8rem;
+        background: #fff;
+    }
+
+    .movie-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        margin-top: auto;
+        border-radius: 6px;
+        border: 1px solid var(--movie-line);
+        color: var(--movie-ink);
+        font-weight: 700;
+        text-decoration: none;
+        transition: background .2s ease, color .2s ease, border-color .2s ease;
+    }
+
+    .movie-link:hover {
+        border-color: var(--movie-accent);
+        background: var(--movie-accent);
+        color: #fff;
+    }
+
+    .empty-state {
+        border: 1px solid rgba(37, 99, 235, .18);
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #1e3a8a;
+        padding: 1rem 1.25rem;
+    }
+
+    .movie-pagination .page-link {
+        border: 0;
+        border-radius: 6px;
+        margin: 0 .25rem;
+        color: var(--movie-ink);
+        box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
+    }
+
+    .movie-pagination .active .page-link {
+        background: var(--movie-accent);
+    }
+
+    @keyframes fadeSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes heroSweep {
+        0%,
+        100% {
+            transform: translateX(-8%);
+        }
+
+        50% {
+            transform: translateX(8%);
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .movie-hero {
+            min-height: 420px;
+        }
+
+        .search-panel {
+            padding: .65rem;
+        }
+
+        .section-heading {
+            align-items: start;
+            flex-direction: column;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
+<section class="movie-hero">
+    <div class="container movie-hero-inner">
+        <span class="eyebrow">Movie discovery</span>
+        <h1 class="hero-title">Find your next watch faster.</h1>
+        <p class="hero-copy">
+            Search the catalog, open detailed movie pages, and keep rating titles to sharpen your recommendations.
+        </p>
+
+        <form method="GET" class="search-panel">
+            <div class="row g-2">
+                <div class="col-md-9 col-lg-10">
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ query }}"
+                        class="form-control"
+                        placeholder="Search by movie title"
+                    >
+                </div>
+                <div class="col-md-3 col-lg-2">
+                    <button type="submit" class="btn movie-btn w-100">
+                        Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
 
 {% if user.is_authenticated %}
-
-<h2 class="mb-4">
-    Recommended For You
-</h2>
-
-{% if personalized_movies %}
-
-<div class="row">
-
-    {% for movie in personalized_movies %}
-
-    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-
-        <div class="card h-100 shadow-sm">
-
-            {% if movie.poster_url %}
-            <img
-                src="{{ movie.poster_url }}"
-                class="card-img-top"
-                alt="{{ movie.title }}"
-                style="height:350px; object-fit:cover;"
-            >
-            {% else %}
-            <div
-                class="d-flex align-items-center justify-content-center bg-light"
-                style="height:350px;"
-            >
-                <span class="text-muted">
-                    No Poster Available
-                </span>
-            </div>
-            {% endif %}
-
-            <div class="card-body d-flex flex-column">
-
-                <h5 class="card-title">
-                    {{ movie.title }}
-                </h5>
-
-                <p class="card-text text-muted">
-                    {{ movie.genres|truncatechars:40 }}
-                </p>
-
-                {% if movie.vote_average > 0 %}
-                <p>
-                    ⭐ {{ movie.vote_average }}
-                </p>
-                {% endif %}
-
-                <a
-                    href="{% url 'movie_detail' movie.id %}"
-                    class="btn btn-primary mt-auto"
-                >
-                    View Details
-                </a>
-
-            </div>
-
+<section>
+    <div class="section-heading">
+        <div>
+            <h2>Recommended For You</h2>
+            <p>Based on your ratings and watch history.</p>
         </div>
-
     </div>
 
-    {% endfor %}
-
-</div>
-
-{% else %}
-
-<div class="alert alert-info">
-    Rate a few movies to get personalized recommendations.
-</div>
-
-{% endif %}
-
-<hr>
-
-{% endif %}
-
-<h2 class="mb-4">
-    Browse Movies
-</h2>
-
-<form method="GET" class="row mb-4">
-
-    <div class="col-md-10">
-
-        <input
-            type="text"
-            name="q"
-            value="{{ query }}"
-            class="form-control"
-            placeholder="Search by movie title... "
-        >
-
-    </div>
-
-    <div class="col-md-2">
-
-        <button
-            type="submit"
-            class="btn btn-primary w-100"
-        >
-            Search
-        </button>
-
-    </div>
-
-</form>
-<div class="row">
-    {% for movie in page_obj %}
-        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-            <div class="card h-100 shadow-sm">
-                {% if movie.poster_url %}
-                    <img
-                        src="{{ movie.poster_url }}"
-                        class="card-img-top"
-                        alt="{{ movie.title }}"
-                        style="height:350px; object-fit:cover;"
-                    >
-                {% else %}
-                    <div
-                        class="d-flex align-items-center justify-content-center bg-light"
-                        style="height:350px;"
-                    >
-                        <span class="text-muted">
-                            No Poster Available
-                        </span>
-                    </div>
-                {% endif %}
-
-                <div class="card-body d-flex flex-column">
-
-                    <h5 class="card-title">
-                        {{ movie.title }}
-                    </h5>
-
-                    <p class="card-text text-muted">
-                        {{ movie.genres|truncatechars:50 }}
-                    </p>
-
-                    {% if movie.release_date %}
-                    <p class="text-muted small">
-                        {{ movie.release_date|date:"Y" }}
-                    </p>
+    {% if personalized_movies %}
+    <div class="row movie-grid">
+        {% for movie in personalized_movies %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <article class="movie-card" style="animation-delay: {{ forloop.counter0 }}0ms;">
+                <div class="poster-wrap">
+                    {% if movie.poster_url %}
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                    {% else %}
+                    <div class="poster-missing">No Poster Available</div>
                     {% endif %}
 
                     {% if movie.vote_average > 0 %}
-                        <p>
-                            ⭐ {{ movie.vote_average }}
-                        </p>
+                    <div class="rating-pill"><span>&#9733;</span> {{ movie.vote_average }}</div>
                     {% endif %}
-                    <a
-                        href="{% url 'movie_detail' movie.id %}"
-                        class="btn btn-primary mt-auto"
-                    >
-                        View Details
-                    </a>
                 </div>
+
+                <div class="movie-card-body">
+                    <h3 class="movie-title">{{ movie.title }}</h3>
+                    <div class="movie-meta">
+                        {% if movie.release_date %}{{ movie.release_date|date:"Y" }}{% else %}Movie{% endif %}
+                    </div>
+                    {% if movie.genres %}
+                    <p><span class="genre-chip">{{ movie.genres|truncatechars:42 }}</span></p>
+                    {% endif %}
+                    <a href="{% url 'movie_detail' movie.id %}" class="movie-link">View Details</a>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        Rate a few movies to unlock personalized recommendations.
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+
+<section>
+    <div class="section-heading">
+        <div>
+            <h2>Browse Movies</h2>
+            <p>
+                {% if query %}
+                Results for "{{ query }}"
+                {% else %}
+                {{ page_obj.paginator.count }} movies in the catalog.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="row movie-grid">
+        {% for movie in page_obj %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <article class="movie-card" style="animation-delay: {{ forloop.counter0 }}0ms;">
+                <div class="poster-wrap">
+                    {% if movie.poster_url %}
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                    {% else %}
+                    <div class="poster-missing">No Poster Available</div>
+                    {% endif %}
+
+                    {% if movie.vote_average > 0 %}
+                    <div class="rating-pill"><span>&#9733;</span> {{ movie.vote_average }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="movie-card-body">
+                    <h3 class="movie-title">{{ movie.title }}</h3>
+                    <div class="movie-meta">
+                        {% if movie.release_date %}{{ movie.release_date|date:"Y" }}{% else %}Movie{% endif %}
+                    </div>
+                    {% if movie.genres %}
+                    <p><span class="genre-chip">{{ movie.genres|truncatechars:48 }}</span></p>
+                    {% endif %}
+                    <a href="{% url 'movie_detail' movie.id %}" class="movie-link">View Details</a>
+                </div>
+            </article>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="empty-state">
+                No movies matched your search. Try another title.
             </div>
         </div>
-    {% endfor %}
-</div>
-<nav>
-    <ul class="pagination justify-content-center">
+        {% endfor %}
+    </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-5" aria-label="Movie pages">
+    <ul class="pagination movie-pagination justify-content-center">
         {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link"
-                   href="?page={{ page_obj.previous_page_number }}&q={{ query }}">
-                    Previous
-                </a>
-            </li>
-        {% endif %}
-        <li class="page-item active">
-            <span class="page-link">{{ page_obj.number }}</span>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query|urlencode }}">
+                Previous
+            </a>
         </li>
+        {% endif %}
+
+        <li class="page-item active" aria-current="page">
+            <span class="page-link">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
         {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link"
-                   href="?page={{ page_obj.next_page_number }}&q={{ query }}">
-                    Next
-                </a>
-            </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query|urlencode }}">
+                Next
+            </a>
+        </li>
         {% endif %}
     </ul>
 </nav>
+{% endif %}
 {% endblock %}

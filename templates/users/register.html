@@ -1,22 +1,191 @@
 {% extends 'base.html' %}
 
+{% block title %}Register{% endblock %}
+{% block body_class %}auth-surface{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-surface {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at top left, rgba(220, 38, 38, .12), transparent 34rem),
+            radial-gradient(circle at 85% 10%, rgba(245, 158, 11, .1), transparent 28rem),
+            #f8fafc;
+    }
+
+    .auth-wrap {
+        display: grid;
+        min-height: calc(100vh - 112px);
+        place-items: center;
+        padding: 2rem 0 4rem;
+    }
+
+    .auth-card {
+        width: min(100%, 520px);
+        overflow: hidden;
+        border: 1px solid rgba(17, 24, 39, .1);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, .94);
+        box-shadow: 0 24px 70px rgba(15, 23, 42, .13);
+        animation: fadeSlideUp .65s ease both;
+        transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .auth-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 80px rgba(15, 23, 42, .16);
+    }
+
+    .auth-card-header {
+        position: relative;
+        overflow: hidden;
+        padding: 2rem;
+        color: #fff;
+        background:
+            linear-gradient(135deg, rgba(17, 24, 39, .96), rgba(153, 27, 27, .9)),
+            url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80") center/cover;
+    }
+
+    .auth-card-header::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(115deg, transparent 0 35%, rgba(255, 255, 255, .16) 45%, transparent 55% 100%);
+        animation: authSweep 5s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .auth-card-header > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .auth-card-header span {
+        color: #fecaca;
+        font-size: .78rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .auth-card-header h1 {
+        margin: .65rem 0 .45rem;
+        font-size: clamp(2rem, 8vw, 3rem);
+        font-weight: 850;
+        letter-spacing: 0;
+    }
+
+    .auth-card-header p {
+        margin: 0;
+        color: rgba(255, 255, 255, .78);
+    }
+
+    .auth-form {
+        padding: 1.5rem 2rem 2rem;
+    }
+
+    .auth-form p {
+        margin-bottom: 1rem;
+    }
+
+    .auth-form label {
+        display: block;
+        margin-bottom: .35rem;
+        color: #374151;
+        font-weight: 800;
+    }
+
+    .auth-form input {
+        width: 100%;
+        min-height: 48px;
+        border: 1px solid rgba(17, 24, 39, .13);
+        border-radius: 6px;
+        padding: .7rem .85rem;
+        outline: none;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .auth-form input:focus {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 .2rem rgba(220, 38, 38, .12);
+    }
+
+    .auth-form .helptext,
+    .auth-form ul {
+        color: #6b7280;
+        font-size: .88rem;
+    }
+
+    .auth-btn {
+        min-height: 48px;
+        border: 0;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #dc2626, #991b1b);
+        color: #fff;
+        font-weight: 800;
+        transition: transform .22s ease, box-shadow .22s ease;
+    }
+
+    .auth-btn:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 14px 26px rgba(153, 27, 27, .25);
+    }
+
+    .auth-switch {
+        margin: 1rem 0 0;
+        color: #6b7280;
+        text-align: center;
+    }
+
+    .auth-switch a {
+        color: #991b1b;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    @keyframes fadeSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes authSweep {
+        0%,
+        100% {
+            transform: translateX(-22%);
+        }
+
+        50% {
+            transform: translateX(22%);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<section class="auth-wrap">
+    <div class="auth-card">
+        <div class="auth-card-header">
+            <span>Start watching smarter</span>
+            <h1>Create Account</h1>
+            <p>Save a watchlist, rate movies, and get personalized recommendations.</p>
+        </div>
 
-<h2>Register</h2>
-
-<form method="post">
-
-    {% csrf_token %}
-
-    {{ form.as_p }}
-
-    <button
-        type="submit"
-        class="btn btn-primary"
-    >
-        Register
-    </button>
-
-</form>
-
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn auth-btn w-100">Register</button>
+            <p class="auth-switch">
+                Already have an account? <a href="{% url 'login' %}">Login</a>
+            </p>
+        </form>
+    </div>
+</section>
 {% endblock %}
