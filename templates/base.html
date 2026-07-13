@@ -13,8 +13,14 @@
             scroll-behavior: smooth;
         }
 
+        html {
+            min-width: 320px;
+        }
+
         body {
             min-height: 100vh;
+            overflow-x: hidden;
+            text-rendering: optimizeLegibility;
         }
 
         .navbar {
@@ -30,13 +36,48 @@
             background: rgba(17, 24, 39, .94) !important;
         }
 
+        .site-nav {
+            min-height: 72px;
+            background: rgba(10, 15, 27, .94) !important;
+        }
+
         .navbar-brand {
-            font-weight: 850;
-            letter-spacing: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: .7rem;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: -.02em;
+        }
+
+        .brand-mark {
+            display: inline-grid;
+            width: 34px;
+            height: 34px;
+            place-items: center;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ef4444, #991b1b);
+            box-shadow: 0 8px 20px rgba(220, 38, 38, .34);
+            color: #fff;
+            font-size: .78rem;
+            font-weight: 900;
+            letter-spacing: .02em;
+        }
+
+        .site-nav .nav-link {
+            padding: .5rem .75rem !important;
+            color: rgba(255, 255, 255, .72) !important;
+            font-size: .93rem;
+            font-weight: 700;
+        }
+
+        .site-nav .nav-link:hover,
+        .site-nav .nav-link:focus {
+            color: #fff !important;
         }
 
         .navbar .btn {
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 700;
             transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
         }
@@ -46,7 +87,10 @@
             box-shadow: 0 10px 22px rgba(0, 0, 0, .18);
         }
 
-        main {
+        main.site-main {
+            width: min(100%, 1320px);
+            padding-right: clamp(.85rem, 2vw, 1.5rem);
+            padding-left: clamp(.85rem, 2vw, 1.5rem);
             animation: pageFade .45s ease both;
         }
 
@@ -93,24 +137,52 @@
                 transition-duration: .01ms !important;
             }
         }
+
+        @media (max-width: 991.98px) {
+            .site-nav .navbar-collapse {
+                padding: .75rem 0 .25rem;
+            }
+
+            .site-nav .navbar-nav {
+                gap: .15rem !important;
+                margin-bottom: .85rem;
+            }
+
+            .site-nav .nav-actions {
+                padding-top: .85rem;
+                border-top: 1px solid rgba(255, 255, 255, .12);
+            }
+        }
+
+        @media (max-width: 420px) {
+            .brand-copy { display: none; }
+            .site-nav { min-height: 62px; }
+            .navbar .btn { padding: .45rem .6rem; font-size: .85rem; }
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 
 <body class="{% block body_class %}{% endblock %}">
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark site-nav">
     <div class="container">
         <a class="navbar-brand" href="{% url 'movie_list' %}">
-            Movie Recommender
+            <span class="brand-mark">MR</span>
+            <span class="brand-copy">MovieMate</span>
         </a>
-        <div class="ms-auto d-flex align-items-center gap-2">
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#site-navigation" aria-controls="site-navigation" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="site-navigation">
+            <ul class="navbar-nav mx-lg-auto gap-lg-2">
+                <li class="nav-item"><a class="nav-link" href="{% url 'movie_list' %}">Discover</a></li>
+                {% if user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">My library</a></li>
+                {% endif %}
+            </ul>
+            <div class="nav-actions d-flex flex-wrap align-items-center gap-2 ms-lg-auto">
             {% if user.is_authenticated %}
-                <span class="text-white d-none d-md-inline">Welcome {{ user.username }}</span>
-                <a
-                    href="{% url 'profile' %}"
-                    class="btn btn-outline-light">
-                    Profile
-                </a>
+                <span class="text-white-50 small d-none d-lg-inline">Hi, {{ user.username }}</span>
                 <form action="{% url 'logout' %}" method="post" class="m-0">
 
                     {% csrf_token %}
@@ -131,11 +203,12 @@
                     Register
                 </a>
             {% endif %}
+            </div>
         </div>
     </div>
 </nav>
 
-<main class="container mt-4">
+<main class="container site-main mt-4">
 
     {% block content %}
     {% endblock %}
@@ -144,6 +217,7 @@
 {% include "chatbot/chatbot.html" %}
 
 <script src="{% static 'chatbot/chatbot.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const revealItems = document.querySelectorAll(

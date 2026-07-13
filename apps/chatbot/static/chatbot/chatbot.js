@@ -15,11 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleBtn.onclick = () => {
         chatWindow.style.display = "flex";
         toggleBtn.style.display = "none";
+        toggleBtn.setAttribute("aria-expanded", "true");
         input.focus();
     };
     closeBtn.onclick = () => {
         chatWindow.style.display = "none";
         toggleBtn.style.display = "block";
+        toggleBtn.setAttribute("aria-expanded", "false");
     };
 
     // ------------------------
@@ -39,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function addUserMessage(text) {
         const div = document.createElement("div");
         div.className = "user-message";
-        div.innerHTML = text;
+        div.textContent = text;
         messages.appendChild(div);
         scrollBottom();
     }
@@ -100,21 +102,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     removeTyping();
 
-    addBotMessage(data.message);
-
-    if (data.type === "movies") {
-        if (data.type === "movie_info") {
-            addMovieCard(data.movie);
-        }
-        data.movies.forEach(movie => {
+    if (data.type === "movie_info") {
+        addMovieInfoCard(data);
+    }
+    else if (data.type === "movies") {
+        addBotMessage(data.message);
+        data.movies.forEach(movie=>{
             addMovieCard(movie);
         });
+    }
+    else{
+        addBotMessage(data.message);
     }
 }
 
 function addMovieCard(movie) {
     const div = document.createElement("div");
-    div.className = "movie-card";
+    div.className = "chat-movie-card";
     div.innerHTML = `
         <div class="card mt-2">
             <div class="row g-0">
@@ -144,6 +148,63 @@ function addMovieCard(movie) {
         </div>
     `;
     messages.appendChild(div);
+    scrollBottom();
+}
+
+function addMovieInfoCard(data){
+
+    const movie = data.movie;
+
+    const div = document.createElement("div");
+    div.className = "movie-info-card";
+
+    div.innerHTML = `
+        <div class="card mt-2 shadow-sm">
+
+            <img
+                src="${movie.poster}"
+                class="card-img-top"
+                onerror="this.src='https://placehold.co/300x450?text=No+Poster'"
+            >
+
+            <div class="card-body">
+
+                <h4>${movie.title}</h4>
+
+                <p>
+                    ⭐ ${movie.rating}
+                    &nbsp;&nbsp;
+                    ${movie.year}
+                </p>
+
+                <p>
+                    <strong>Genres:</strong>
+                    ${movie.genres}
+                </p>
+
+                <p>
+                    ${movie.overview}
+                </p>
+
+                <p>
+                    <strong>Director:</strong>
+                    ${movie.director}
+                </p>
+
+                    <button
+                    class="btn btn-primary btn-sm similar-btn"
+                    data-title="${movie.title}"
+                >
+                    🎥 See Similar Movies
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+    messages.appendChild(div);
+
     scrollBottom();
 }
 
@@ -185,6 +246,12 @@ function addMovieCard(movie) {
         };
     });
 
+    document.addEventListener("click", function(e){
+    if(e.target.classList.contains("similar-btn")){
+        const title = e.target.dataset.title;
+        sendToBackend(`Recommend movies similar to ${title}`);
+    }
+});
     // ------------------------
     // New Chat
     // ------------------------

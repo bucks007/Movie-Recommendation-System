@@ -27,8 +27,8 @@
         position: relative;
         overflow: hidden;
         min-height: 320px;
-        margin: -1.5rem -12px 2rem;
-        padding: clamp(2.5rem, 7vw, 5.5rem) 12px 2rem;
+        margin: -1.5rem calc(50% - 50vw) 2rem;
+        padding: clamp(2.5rem, 7vw, 5.5rem) max(1rem, calc((100vw - min(100vw - 2rem, 1290px)) / 2)) 2rem;
         color: #fff;
         background:
             linear-gradient(90deg, rgba(8, 13, 23, .96) 0%, rgba(17, 24, 39, .82) 48%, rgba(17, 24, 39, .38) 100%),
@@ -125,6 +125,34 @@
         transform: translateY(-2px);
         box-shadow: 0 14px 26px rgba(153, 27, 27, .28);
     }
+
+    .filter-toggle {
+        min-height: 54px;
+        border: 1px solid rgba(255, 255, 255, .35);
+        border-radius: 6px;
+        background: rgba(17, 24, 39, .3);
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .filter-toggle:hover { background: rgba(255, 255, 255, .16); color: #fff; }
+
+    .filter-options {
+        margin-top: .7rem;
+        padding-top: .7rem;
+        border-top: 1px solid rgba(255, 255, 255, .18);
+    }
+
+    .filter-options .form-select { min-height: 48px; border: 0; border-radius: 6px; }
+
+    .genre-filter-label { display: block; margin-bottom: .5rem; color: #fff; font-size: .875rem; font-weight: 700; }
+    .genre-chips { display: flex; max-height: 166px; flex-wrap: wrap; gap: .5rem; overflow-y: auto; padding: .1rem .2rem .35rem; }
+    .genre-filter-chip { border: 1px solid rgba(255, 255, 255, .4); border-radius: 999px; padding: .42rem .72rem; background: rgba(255, 255, 255, .08); color: #fff; cursor: pointer; font-size: .84rem; font-weight: 700; transition: background .18s ease, color .18s ease, transform .18s ease; }
+    .genre-filter-chip:hover { background: rgba(255, 255, 255, .2); transform: translateY(-1px); }
+    .genre-filter-chip.selected { border-color: #fff; background: #fff; color: var(--movie-accent-dark); box-shadow: 0 7px 16px rgba(0, 0, 0, .16); }
+
+    .clear-filter { color: #fff; font-weight: 700; text-decoration: none; }
+    .clear-filter:hover { color: #fecaca; }
 
     .section-heading {
         display: flex;
@@ -298,6 +326,16 @@
         box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
     }
 
+    .movie-pagination .page-link:hover {
+        background: #fee2e2;
+        color: var(--movie-accent-dark);
+    }
+
+    .movie-pagination .page-item.disabled .page-link {
+        background: transparent;
+        box-shadow: none;
+    }
+
     .movie-pagination .active .page-link {
         background: var(--movie-accent);
     }
@@ -338,6 +376,11 @@
             align-items: start;
             flex-direction: column;
         }
+
+        .movie-pagination .page-link {
+            margin: 0 .1rem;
+            padding: .5rem .65rem;
+        }
     }
 </style>
 {% endblock %}
@@ -353,7 +396,7 @@
 
         <form method="GET" class="search-panel">
             <div class="row g-2">
-                <div class="col-md-9 col-lg-10">
+                <div class="col-md-7 col-lg-8">
                     <input
                         type="text"
                         name="q"
@@ -366,6 +409,48 @@
                     <button type="submit" class="btn movie-btn w-100">
                         Search
                     </button>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn filter-toggle w-100" type="button" data-bs-toggle="collapse" data-bs-target="#movie-filters" aria-expanded="{% if selected_genres or selected_rating or selected_year %}true{% else %}false{% endif %}" aria-controls="movie-filters">
+                        Filters
+                    </button>
+                </div>
+            </div>
+            <div class="collapse {% if selected_genres or selected_rating or selected_year %}show{% endif %} filter-options" id="movie-filters">
+                <div class="row g-2 align-items-end">
+                    <div class="col-12">
+                        <span class="genre-filter-label">Genres <span class="fw-normal opacity-75">(choose one or more)</span></span>
+                        <div class="genre-chips">
+                            {% for genre in genre_options %}
+                            <button type="button" class="genre-filter-chip {% if genre in selected_genres %}selected{% endif %}" data-genre="{{ genre }}" aria-pressed="{% if genre in selected_genres %}true{% else %}false{% endif %}">{{ genre }}</button>
+                            {% endfor %}
+                        </div>
+                        <div id="selected-genre-inputs">{% for genre in selected_genres %}<input type="hidden" name="genre" value="{{ genre }}">{% endfor %}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-white" for="rating">Minimum rating</label>
+                        <select class="form-select" name="rating" id="rating">
+                            <option value="">Any rating</option>
+                            <option value="9" {% if selected_rating == "9" %}selected{% endif %}>9+ stars</option>
+                            <option value="8" {% if selected_rating == "8" %}selected{% endif %}>8+ stars</option>
+                            <option value="7" {% if selected_rating == "7" %}selected{% endif %}>7+ stars</option>
+                            <option value="6" {% if selected_rating == "6" %}selected{% endif %}>6+ stars</option>
+                            <option value="5" {% if selected_rating == "5" %}selected{% endif %}>5+ stars</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-white" for="year">Release year</label>
+                        <select class="form-select" name="year" id="year">
+                            <option value="">All years</option>
+                            {% for year in year_options %}
+                            <option value="{{ year|date:'Y' }}" {% if selected_year == year|date:'Y' %}selected{% endif %}>{{ year|date:"Y" }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex gap-2">
+                        <button type="submit" class="btn movie-btn flex-grow-1">Apply</button>
+                        <a href="{% url 'movie_list' %}" class="clear-filter align-self-center">Clear</a>
+                    </div>
                 </div>
             </div>
         </form>
@@ -425,8 +510,8 @@
         <div>
             <h2>Browse Movies</h2>
             <p>
-                {% if query %}
-                Results for "{{ query }}"
+                {% if query or selected_genres or selected_rating or selected_year %}
+                {{ page_obj.paginator.count }} matching movies.
                 {% else %}
                 {{ page_obj.paginator.count }} movies in the catalog.
                 {% endif %}
@@ -477,21 +562,25 @@
     <ul class="pagination movie-pagination justify-content-center">
         {% if page_obj.has_previous %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query|urlencode }}">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
                 Previous
             </a>
         </li>
         {% endif %}
 
-        <li class="page-item active" aria-current="page">
-            <span class="page-link">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </span>
-        </li>
+        {% for page_number in page_numbers %}
+            {% if page_number == page_obj.paginator.ELLIPSIS %}
+            <li class="page-item disabled"><span class="page-link">{{ page_number }}</span></li>
+            {% elif page_number == page_obj.number %}
+            <li class="page-item active" aria-current="page"><span class="page-link">{{ page_number }}</span></li>
+            {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">{{ page_number }}</a></li>
+            {% endif %}
+        {% endfor %}
 
         {% if page_obj.has_next %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query|urlencode }}">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
                 Next
             </a>
         </li>
@@ -499,4 +588,34 @@
     </ul>
 </nav>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const inputContainer = document.getElementById("selected-genre-inputs");
+        const genreChips = document.querySelectorAll(".genre-filter-chip");
+
+        function syncSelectedGenres() {
+            inputContainer.innerHTML = "";
+            genreChips.forEach(function (chip) {
+                if (!chip.classList.contains("selected")) return;
+
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "genre";
+                input.value = chip.dataset.genre;
+                inputContainer.appendChild(input);
+            });
+        }
+
+        genreChips.forEach(function (chip) {
+            chip.addEventListener("click", function () {
+                const selected = chip.classList.toggle("selected");
+                chip.setAttribute("aria-pressed", selected ? "true" : "false");
+                syncSelectedGenres();
+            });
+        });
+    });
+</script>
 {% endblock %}
