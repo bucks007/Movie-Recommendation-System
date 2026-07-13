@@ -60,7 +60,7 @@ def execute_tool(intent,user,message):
     elif intent == Intent.ACTOR:
         return actor_tool(user,message)
     elif intent == Intent.DIRECTOR_MOVIES:
-        return director_movies_tool(message)
+        return director_movies_tool(user,message)
     elif intent == Intent.YEAR:
         return year_tool(message)
     
@@ -162,16 +162,13 @@ def personalized_tool(user):
 def movie_info_tool(user,message):
     movie = MovieParser.find_movie(user, message)
     if movie is None:
-
         movie = MovieParser.get_last_movie(user)
 
     if movie is None:
-
         return {
             "type": "text",
             "message": "Which movie are you referring to?"
         }
-    
     msg = message.lower()
 
     if "director" in msg or "directed" in msg:
@@ -224,7 +221,7 @@ def movie_info_tool(user,message):
 
     return {
         "type": "movie_info",
-        "message": answer,
+
         "movie": {
             "id": movie.id,
             "title": movie.title,
@@ -236,10 +233,36 @@ def movie_info_tool(user,message):
             "rating": movie.vote_average,
             "year": (
                 movie.release_date.year
-                if movie.release_date
-                else ""
-            )
-        }
+                if movie.release_date else ""
+            ),
+            "genres": movie.genres,
+            "overview": movie.overview,
+            "director": movie.director,
+            "actors": movie.actors,
+        },
+
+        "actions": [
+            {
+                "id": "similar",
+                "label": "🎥 Similar Movies",
+            },
+            {
+                "id": "director_movies",
+                "label": "🎬 More by this Director",
+            },
+            {
+                "id": "cast",
+                "label": "🎭 Full Cast",
+            },
+            {
+                "id": "watchlist",
+                "label": "➕ Add to Watchlist",
+            },
+            {
+                "id": "rate",
+                "label": "⭐ Rate Movie",
+            },
+        ]
     }
 
 def genre_tool(message):
@@ -333,8 +356,25 @@ def latest_tool(message):
         "movies": serialize_movies(movies)
     }
 
-def actor_tool(message):
-    actor = message
+def actor_tool(user, message):
+
+    movie = MovieParser.find_movie(user, message)
+
+    if movie:
+        return {
+            "type": "movie_info",
+            "message": (
+                f"The main cast of {movie.title} includes:\n\n{movie.actors}"
+                if movie.actors
+                else "Cast information is not available."
+            ),
+            "movie": serialize_movies([movie])[0],
+        }
+
+    movie = MovieParser.get_last_movie(user)
+
+    if movie:
+        return movie_info_tool(user, message)
 
     actor = re.sub(
         r"(movies|movie|starring|with|actor|actors)",
@@ -344,34 +384,56 @@ def actor_tool(message):
     ).strip()
 
     movies = get_movies_by_actor(actor)
+
     if not movies:
         return {
             "type": "text",
             "message": "No movies found."
         }
+
     return {
         "type": "movies",
         "message": f"Movies starring {actor}",
         "movies": serialize_movies(movies)
     }
 
-def director_movies_tool(message):
+def director_movies_tool(user, message):
+    movie = MovieParser.find_movie(user, message)
+
+    if not movie:
+        movie = MovieParser.get_last_movie(user)
+
+    if movie:
+        return {
+            "type": "movie_info",
+            "message": (
+                f"🎬 {movie.title} was directed by\n\n"
+                f"{movie.director}"
+                if movie.director
+                else "Director information is unavailable."
+            ),
+            "movie": serialize_movies([movie])[0],
+        }
+
     director = re.sub(
         r"(movies|movie|directed by|movies by|films by|director)",
         "",
         message,
         flags=re.IGNORECASE,
     ).strip()
+
     movies = get_movies_by_director(director)
+
     if not movies:
         return {
             "type": "text",
             "message": "No movies found."
         }
+
     return {
         "type": "movies",
         "message": f"Movies directed by {director}",
-        "movies": serialize_movies(movies)
+        "movies": serialize_movies(movies),
     }
 
 def year_tool(message):

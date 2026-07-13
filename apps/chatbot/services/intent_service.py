@@ -71,10 +71,18 @@ def detect_intent(message):
     ):
         return Intent.LATEST
     
+    # Similar movie
+
+    if re.search(
+        r"\b(similar|like)\b",
+        message
+    ):
+        return Intent.SIMILAR
+    
     # Actor
 
     if re.search(
-        r"\b(starring|actor|actors|with)\b",
+        r"\b(actor|actors|cast|starring)\b",
         message
     ):
         return Intent.ACTOR
@@ -95,14 +103,6 @@ def detect_intent(message):
     ):
         return Intent.YEAR
 
-    # Similar movie
-
-    if re.search(
-        r"\b(similar|like)\b",
-        message
-    ):
-        return Intent.SIMILAR
-
     # Recommendation
 
     if re.search(
@@ -122,7 +122,7 @@ def detect_intent(message):
     # Movie information
 
     if re.search(
-        r"\b(plot|story|director|directed|actor|actors|cast|runtime|release|released|rating|imdb)\b",
+        r"\b(tell me about|about|plot|story|director|directed|actor|actors|cast|runtime|release|released|rating|imdb)\b",
         message
     ):
         return Intent.MOVIE_INFO

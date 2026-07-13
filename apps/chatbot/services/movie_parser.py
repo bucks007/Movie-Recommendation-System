@@ -13,6 +13,7 @@ class MovieParser:
             r"\b("
             r"who|what|when|where|tell|me|about|"
             r"director|directed|actor|actors|cast|"
+            r"this|that|it|its|"
             r"plot|story|runtime|release|released|"
             r"rating|imdb|movie|movies|film|"
             r"similar|like|recommend|recommended|"
@@ -32,6 +33,29 @@ class MovieParser:
 
         query = MovieParser.clean_query(message)
         state = get_state(user.id)
+
+        msg = message.lower()
+
+        # If the user refers to the previous movie, return it immediately
+        if any(
+            word in msg
+            for word in [
+                "this",
+                "that",
+                "it",
+                "its",
+            ]
+        ):
+            movie = MovieParser.get_last_movie(user)
+            if movie:
+                return movie
+
+        # Remove punctuation after cleaning
+        query = re.sub(r"[^\w\s]", "", query).strip()
+
+        # Avoid fuzzy searching empty queries like "?"
+        if len(query) < 3:
+            return None
 
         if not query:
             return None

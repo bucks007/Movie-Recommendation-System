@@ -22,14 +22,21 @@ rewrite_runnable = RunnableLambda(
     }
 )
 
-intent_runnable = RunnableLambda(
-    lambda x: {
+def intent_node(x):
+    intent = detect_intent(x["message"])
+
+    print("=" * 60)
+    print("Original :", x["message"])
+    print("Rewritten:", x["query"])
+    print("Intent   :", intent)
+    print("=" * 60)
+
+    return {
         **x,
-        "intent": detect_intent(
-            x["query"]
-        )
+        "intent": intent,
     }
-)
+
+intent_runnable = RunnableLambda(intent_node)
 
 def recommendation_node(x):
 
@@ -93,9 +100,10 @@ chat_branch = RunnableBranch(
         lambda x: x["intent"] in {
             Intent.MOVIE_INFO,
             Intent.SEARCH,
-            Intent.UNKNOWN,
+            Intent.ACTOR,
+            Intent.DIRECTOR_MOVIES,
         },
-        semantic_runnable,
+        tool_runnable,
     ),
 
     tool_runnable,

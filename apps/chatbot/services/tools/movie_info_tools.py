@@ -2,12 +2,12 @@ from langchain_core.tools import tool
 from ..movie_parser import MovieParser
 
 @tool
-def movie_information(title: str):
+def movie_information(user, message: str):
     """
    Get detailed information about a movie.
     """
 
-    movie = MovieParser.find_movie(title)
+    movie = MovieParser.find_movie(user, message)
 
     if movie is None:
         return "Movie not found."
