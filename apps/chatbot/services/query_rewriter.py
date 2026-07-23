@@ -3,6 +3,7 @@ from langchain_core.output_parsers import StrOutputParser
 
 from .llm_service import llm
 from .memory_store import get_session_history
+from .conversation_rewriter import rewrite_from_memory
 
 
 rewrite_prompt = ChatPromptTemplate.from_template(
@@ -33,7 +34,10 @@ rewrite_chain = (
 
 
 def rewrite_query(user, query):
-
+    query = rewrite_from_memory(
+        user,
+        query
+    )
     history = get_session_history(str(user.id))
 
     history_text = "\n".join(

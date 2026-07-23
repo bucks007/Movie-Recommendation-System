@@ -82,7 +82,7 @@ def detect_intent(message):
     # Actor
 
     if re.search(
-        r"\b(actor|actors|cast|starring)\b",
+        r"(movies?\s+starring|films?\s+starring|actor|actors|cast|starring)",
         message
     ):
         return Intent.ACTOR
@@ -90,7 +90,7 @@ def detect_intent(message):
     # Director Movies
 
     if re.search(
-        r"\b(directed by|movies by)\b",
+        r"(movies?\s+directed\s+by|films?\s+directed\s+by|movies?\s+by|films?\s+by|same director|more by)",
         message
     ):
         return Intent.DIRECTOR_MOVIES
@@ -130,9 +130,10 @@ def detect_intent(message):
     # Search
 
     if re.search(
-        r"\b(find|search|show)\b",
+        r"\b(find|search|show|look up)\b",
         message
     ):
         return Intent.SEARCH
 
     return Intent.UNKNOWN
+    

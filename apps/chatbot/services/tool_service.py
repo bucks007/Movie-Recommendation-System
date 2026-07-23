@@ -64,6 +64,15 @@ def execute_tool(intent,user,message):
     elif intent == Intent.YEAR:
         return year_tool(message)
     
+    movie = MovieParser.find_movie(user, message)
+
+    if movie:
+        return {
+            "type": "movie_info",
+            "message": "",
+            "movie": serialize_movies([movie])[0]
+        }
+    
     return {
         "type": "text",
         "message": "I couldn't understand your request."
@@ -374,7 +383,14 @@ def actor_tool(user, message):
     movie = MovieParser.get_last_movie(user)
 
     if movie:
-        return movie_info_tool(user, message)
+        return {
+            "type": "text",
+            "message": (
+                f"The main cast of {movie.title} includes:\n\n{movie.actors}"
+                if movie.actors
+                else "Cast information is not available."
+            ),
+        }
 
     actor = re.sub(
         r"(movies|movie|starring|with|actor|actors)",
@@ -398,36 +414,58 @@ def actor_tool(user, message):
     }
 
 def director_movies_tool(user, message):
-    movie = MovieParser.find_movie(user, message)
+    msg = message.lower()
 
-    if not movie:
+    # -------------------------------------------------
+    # Context-aware queries
+    # -------------------------------------------------
+
+    if any(
+        phrase in msg
+        for phrase in [
+            "same director",
+            "another one",
+            "more by this director",
+            "his movies",
+            "her movies",
+        ]
+    ):
         movie = MovieParser.get_last_movie(user)
+        if not movie:
+            return {
+                "type": "text",
+                "message": "Which movie are you referring to?"
+            }
+        director = movie.director
+        if not director:
+            return {
+                "type": "text",
+                "message": "I don't know who directed that movie."
+            }
 
-    if movie:
-        return {
-            "type": "movie_info",
-            "message": (
-                f"🎬 {movie.title} was directed by\n\n"
-                f"{movie.director}"
-                if movie.director
-                else "Director information is unavailable."
-            ),
-            "movie": serialize_movies([movie])[0],
-        }
+    else:
+        director = re.sub(
+            r"(movies?|films?|directed\s+by|movies\s+by|films\s+by|director)",
+            "",
+            message,
+            flags=re.IGNORECASE,
+        )
 
-    director = re.sub(
-        r"(movies|movie|directed by|movies by|films by|director)",
-        "",
-        message,
-        flags=re.IGNORECASE,
-    ).strip()
+        director = re.sub(r"\s+", " ", director).strip()
 
     movies = get_movies_by_director(director)
+    current_movie = MovieParser.get_last_movie(user)
+
+    if current_movie:
+        movies = [
+            m for m in movies
+            if m.id != current_movie.id
+        ]
 
     if not movies:
         return {
             "type": "text",
-            "message": "No movies found."
+            "message": f"No movies found for {director}."
         }
 
     return {

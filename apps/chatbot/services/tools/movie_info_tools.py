@@ -14,15 +14,10 @@ def movie_information(user, message: str):
 
     return f"""
         Title: {movie.title}
-
         Genres: {movie.genres}
-
         Director: {movie.director}
-
         Actors: {movie.actors}
-
         IMDb Rating: {movie.vote_average}
-
         Overview:
         {movie.overview}
         """

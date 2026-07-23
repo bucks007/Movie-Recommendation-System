@@ -6,17 +6,26 @@ def serialize_movies(movies):
             "id": movie.id,
             "movie_id": movie.movie_id,
             "title": movie.title,
+
             "poster": (
                 movie.poster_url
                 if movie.poster_url
                 else "https://placehold.co/300x450?text=No+Poster"
             ),
+
             "rating": movie.vote_average,
+
             "genres": movie.genres,
+
             "year": (
                 movie.release_date.year
                 if movie.release_date
                 else None
             ),
+
+            "overview": movie.overview,
+            "director": movie.director,
+            "actors": movie.actors,
         })
+
     return data

@@ -2,6 +2,7 @@ import re
 from rapidfuzz import process, fuzz
 from apps.movies.models import Movie
 from .memory_store import get_state
+from .conversation_memory import remember_movie
 
 
 class MovieParser:
@@ -27,12 +28,9 @@ class MovieParser:
 
         return re.sub(r"\s+", " ", query).strip()
 
-
     @staticmethod
     def find_movie(user,message):
-
         query = MovieParser.clean_query(message)
-        state = get_state(user.id)
 
         msg = message.lower()
 
@@ -69,7 +67,7 @@ class MovieParser:
         ).first()
 
         if movie:
-            state["last_movie_id"] = movie.id
+            remember_movie(user, movie)
             return movie
 
     # -------------------------
@@ -85,7 +83,7 @@ class MovieParser:
                 "-vote_average",
                 "-release_date"
             ).first()
-            state["last_movie_id"] = movie.id
+            remember_movie(user, movie)
             return movie
 
 
@@ -125,7 +123,7 @@ class MovieParser:
                 movie = Movie.objects.get(
                     id=movie.id
                 )
-                state["last_movie_id"] = movie.id
+                remember_movie(user, movie)
                 return movie
 
         return None

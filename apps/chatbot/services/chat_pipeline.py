@@ -74,7 +74,7 @@ def tool_node(x):
     return execute_tool(
         x["intent"],
         x["user"],
-        x["message"],
+        x["query"],
     )
 
 
