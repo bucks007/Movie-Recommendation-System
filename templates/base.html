@@ -216,6 +216,8 @@
 </main>
 {% include "chatbot/chatbot.html" %}
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>marked.setOptions({breaks: true,gfm: true});</script>
 <script src="{% static 'chatbot/chatbot.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>

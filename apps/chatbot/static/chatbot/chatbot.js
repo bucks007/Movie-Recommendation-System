@@ -34,6 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("chat-body").scrollHeight;
     }
 
+    function formatBotMessage(text) {
+    if (!text) return "";
+
+    // Convert Markdown → HTML
+    return marked.parse(text);
+}
+
     // ------------------------
     // User Bubble
     // ------------------------
@@ -51,12 +58,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // ------------------------
 
     function addBotMessage(text) {
-        const div = document.createElement("div");
-        div.className = "bot-message";
-        div.innerHTML = text;
-        messages.appendChild(div);
-        scrollBottom();
-    }
+    const div = document.createElement("div");
+    div.className = "bot-message";
+
+    div.innerHTML = formatBotMessage(text);
+
+    messages.appendChild(div);
+    scrollBottom();
+}
 
     // ------------------------
     // Typing Indicator

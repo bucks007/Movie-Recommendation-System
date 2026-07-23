@@ -1,90 +1,70 @@
 <div id="chatbot-container">
+  <button
+    id="chat-toggle"
+    aria-label="Open movie assistant"
+    aria-expanded="false"
+  >
+    <span>AI</span><span class="chat-toggle-label">Ask MovieMate</span>
+  </button>
 
-    <button id="chat-toggle" aria-label="Open movie assistant" aria-expanded="false">
-        <span>AI</span><span class="chat-toggle-label">Ask MovieMate</span>
-    </button>
+  <div id="chat-window">
+    <div class="chat-header">
+      <div>
+        <h5>Movie AI Assistant</h5>
 
-    <div id="chat-window">
+        <small> Your movie guide </small>
+      </div>
 
-        <div class="chat-header">
+      <div>
+        <button
+          id="new-chat-btn"
+          class="icon-btn"
+          title="New Chat"
+          aria-label="New chat"
+        >
+          +
+        </button>
 
-            <div>
-                <h5>
-                    Movie AI Assistant
-                </h5>
-
-                <small>
-                    Your movie guide
-                </small>
-            </div>
-
-            <div>
-                <button
-                    id="new-chat-btn"
-                    class="icon-btn"
-                    title="New Chat"
-                    aria-label="New chat"
-                >
-                    +
-                </button>
-
-                <button
-                    id="close-chat"
-                    class="icon-btn"
-                    title="Close"
-                    aria-label="Close chat"
-                >
-                    &times;
-                </button>
-            </div>
-
-        </div>
-
-        <div id="chat-body">
-
-            <div class="welcome-screen">
-
-                <div class="robot">
-                    AI
-                </div>
-
-                <h4>
-                    Welcome!
-                </h4>
-
-                <p>
-                    Ask me anything about movies.
-                </p>
-
-                <div class="chips">
-                    <button class="chip">Trending Movies</button>
-                    <button class="chip">Sci-Fi</button>
-                    <button class="chip">Comedy</button>
-                    <button class="chip">Romance</button>
-                    <button class="chip">Recommend For Me</button>
-                    <button class="chip">Movies like Interstellar</button>
-                </div>
-
-            </div>
-
-            <div id="messages"></div>
-
-        </div>
-
-        <div class="chat-footer">
-
-            <textarea
-                id="message-input"
-                rows="1"
-                placeholder="Ask about movies..."
-            ></textarea>
-
-            <button id="send-btn" aria-label="Send message">
-                &gt;
-            </button>
-
-        </div>
-
+        <button
+          id="close-chat"
+          class="icon-btn"
+          title="Close"
+          aria-label="Close chat"
+        >
+          &times;
+        </button>
+      </div>
     </div>
 
+    <div id="chat-body">
+      <div class="welcome-screen">
+        <div class="robot">AI</div>
+
+        <h4>Welcome!</h4>
+
+        <p>Ask me anything about movies.</p>
+
+        <div class="chips">
+          <button class="chip">Trending Movies</button>
+          <button class="chip">Sci-Fi</button>
+          <button class="chip">Comedy</button>
+          <button class="chip">Romance</button>
+          <button class="chip">Recommend For Me</button>
+          <button class="chip">Movies like Interstellar</button>
+        </div>
+      </div>
+
+      <div id="messages"></div>
+    </div>
+
+    <div class="chat-footer">
+      <textarea
+        id="message-input"
+        rows="1"
+        placeholder="Ask about movies..."
+      ></textarea>
+
+      <button id="send-btn" aria-label="Send message">&gt;</button>
+    </div>
+  </div>
 </div>
